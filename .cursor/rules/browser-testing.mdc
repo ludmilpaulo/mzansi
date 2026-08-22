@@ -1,0 +1,15 @@
+---
+description: Local URLs for Mzansi browser testing
+alwaysApply: false
+---
+
+# Browser testing
+
+| Surface | URL |
+|---------|-----|
+| Public site / portal / staff | http://localhost:3000 |
+| Django API | http://127.0.0.1:8000 |
+| OpenAPI | http://127.0.0.1:8000/api/docs/ |
+| Django admin | http://127.0.0.1:8000/admin/ |
+
+Local demo users: `docs/seed-accounts.md` after `seed_platform --with-demo-users`.

@@ -1,0 +1,14 @@
+---
+description: Mzansi Visa Solutions platform standards
+alwaysApply: true
+---
+
+# Mzansi Visa Solutions
+
+- API (`backend/`) is the source of truth. Do not hardcode services, FAQs, statuses, or marketing copy in `web/` or `mobile/`.
+- No TypeScript `any` / `as any` / `Record<string, any>`.
+- No fake production clients or applications in UI. Seed only via `python manage.py seed_platform`.
+- Enforce permissions in Django. Frontend guards are UX only.
+- Documents are private. Never serve uploads as public static files.
+- Never promise guaranteed visa or permanent residence approval.
+- Payments stay provider-agnostic (`apps/payments/providers.py`).

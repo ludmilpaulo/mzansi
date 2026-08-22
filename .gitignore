@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+*.cover
+
+# Django
+backend/db.sqlite3
+backend/db.sqlite3-journal
+backend/media/
+backend/staticfiles/
+*.log
+local_settings.py
+
+# Node
+node_modules/
+.next/
+out/
+dist/
+.turbo/
+*.tsbuildinfo
+web/.next/
+mobile/.expo/
+mobile/dist/
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+backend/.env
+web/.env
+web/.env.local
+mobile/.env
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Docker / tooling
+.docker/
+celerybeat-schedule
+celerybeat.pid
+
+# Tests / Playwright
+test-results/
+playwright-report/
+coverage/
+
+# Uploads / generated
+*.pem
+*.key
