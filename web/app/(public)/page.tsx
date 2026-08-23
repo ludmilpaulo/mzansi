@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { ProfessionalServiceJsonLd } from "@/components/public/JsonLd";
+import { OrganizationJsonLd, ProfessionalServiceJsonLd, WebSiteJsonLd } from "@/components/public/JsonLd";
 import {
   ContactCta,
   FeaturedArticles,
@@ -24,27 +24,33 @@ import {
   trustFromHome,
   whyChooseFromHome,
 } from "@/lib/content";
+import { loadSeoDefaults } from "@/lib/public-seo";
 import { serverGet } from "@/lib/server-api";
+import { generatePageMetadata, parseSeoDefaults, routeSeo } from "@/lib/seo";
 import type { HomeContent } from "@/types/api";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
+  const defaults = await loadSeoDefaults();
   try {
     const home = await serverGet<HomeContent>("/content/settings/home");
     const brand = brandFromHome(home);
     const hero = heroFromHome(home);
-    return {
-      title: brand.name,
-      description: hero?.subtitle || brand.tagline,
-      openGraph: {
-        title: hero?.title || brand.name,
-        description: hero?.subtitle || brand.tagline,
-        images: hero?.image_url ? [{ url: hero.image_url }] : undefined,
+    const seo = parseSeoDefaults(home.settings.seo);
+    const route = routeSeo(seo, "home");
+    return generatePageMetadata(
+      {
+        title: route.title || brand.name,
+        description: route.description || hero?.subtitle || brand.tagline,
+        path: "/",
+        imageUrl: hero?.image_url,
       },
-    };
+      seo.defaultTitle ? seo : defaults,
+    );
   } catch {
-    return { title: "Mzansi Visa Solutions" };
+    const route = routeSeo(defaults, "home");
+    return generatePageMetadata({ title: route.title, description: route.description, path: "/" }, defaults);
   }
 }
 
@@ -71,6 +77,8 @@ export default async function HomePage() {
   const disclaimer = disclaimerFromHome(home);
   return (
     <>
+      <OrganizationJsonLd brand={brand} />
+      <WebSiteJsonLd brand={brand} />
       <ProfessionalServiceJsonLd brand={brand} />
       {hero ? <HomeHeroSection hero={hero} trust={trustFromHome(home)} /> : null}
       <TrustStrip points={trustFromHome(home)} />

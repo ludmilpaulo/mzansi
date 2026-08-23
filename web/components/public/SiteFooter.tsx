@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 
 import { BrandMark } from "@/components/brand/BrandMark";
+import { trackEvent } from "@/lib/analytics";
 import type { Disclaimer } from "@/lib/content";
 import type { BrandSettings } from "@/types/api";
 
@@ -13,8 +16,25 @@ export function SiteFooter({ brand, disclaimer }: { brand: BrandSettings; discla
           {brand.tagline ? <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/65">{brand.tagline}</p> : null}
           <ul className="mt-6 space-y-2 text-sm text-white/70">
             {brand.address ? <li>{brand.address}</li> : null}
-            {brand.phone ? <li>{brand.phone}</li> : null}
-            {brand.email ? <li>{brand.email}</li> : null}
+            {brand.phone ? (
+              <li>
+                <a href={`tel:${brand.phone.replaceAll(" ", "")}`} onClick={() => trackEvent({ name: "phone_clicked" })}>
+                  {brand.phone}
+                </a>
+              </li>
+            ) : null}
+            {brand.email ? (
+              <li>
+                <a href={`mailto:${brand.email}`}>{brand.email}</a>
+              </li>
+            ) : null}
+            {brand.whatsapp ? (
+              <li>
+                <a href={brand.whatsapp} onClick={() => trackEvent({ name: "whatsapp_clicked" })}>
+                  WhatsApp
+                </a>
+              </li>
+            ) : null}
           </ul>
         </div>
         <div className="md:col-span-3">
@@ -31,8 +51,18 @@ export function SiteFooter({ brand, disclaimer }: { brand: BrandSettings; discla
               </Link>
             </li>
             <li>
-              <Link href="/resources" className="hover:text-white">
-                Resources
+              <Link href="/immigration-guides" className="hover:text-white">
+                Guides
+              </Link>
+            </li>
+            <li>
+              <Link href="/countries" className="hover:text-white">
+                Countries
+              </Link>
+            </li>
+            <li>
+              <Link href="/locations" className="hover:text-white">
+                Cape Town
               </Link>
             </li>
             <li>

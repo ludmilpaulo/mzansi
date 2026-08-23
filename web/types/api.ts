@@ -155,7 +155,30 @@ export interface DetailResponse {
   detail: string;
 }
 
-export interface ServiceList {
+export interface SeoFields {
+  seo_title: string;
+  seo_description: string;
+  og_title: string;
+  og_description: string;
+  og_image_url: string;
+  canonical_path: string;
+  robots: string;
+  focus_keyword: string;
+  related_keywords: string[];
+  locale: string;
+}
+
+export interface OfficialSource {
+  label: string;
+  url: string;
+}
+
+export interface LandingFaq {
+  question: string;
+  answer: string;
+}
+
+export interface ServiceList extends SeoFields {
   id: number;
   name: string;
   slug: string;
@@ -166,8 +189,6 @@ export interface ServiceList {
   estimated_processing: string;
   is_active: boolean;
   sort_order: number;
-  seo_title: string;
-  seo_description: string;
 }
 
 export interface ServiceRequirement {
@@ -192,6 +213,9 @@ export interface ServiceDetail extends ServiceList {
   description: string;
   who_its_for: string;
   process_overview: string;
+  how_we_help: string;
+  official_sources: OfficialSource[] | JsonValue;
+  related_service_slugs: string[];
   requirements: ServiceRequirement[];
   faqs: ServiceFAQ[];
 }
@@ -246,6 +270,132 @@ export interface ApplicationTask {
   created_at: string;
 }
 
+export type TrackingStatus =
+  | "APPLICATION_RECEIVED"
+  | "APPLICATION_UNDER_PROCESS"
+  | "DECISION_RETURNED"
+  | "READY_FOR_COLLECTION"
+  | "UNKNOWN";
+
+export type TrackingProviderCode = "VFS" | "DHA" | "MANUAL";
+export type TrackingSource = "API" | "MANUAL" | "UNAVAILABLE";
+export type TrackingJourneyState = "complete" | "current" | "upcoming";
+export type TrackingHealth = "connected" | "manual" | "fallback" | "error" | "not_configured";
+
+export interface InternalStatusSummary {
+  code: string;
+  label: string;
+}
+
+export interface ExternalTrackingSummary {
+  enabled: boolean;
+  provider: TrackingProviderCode | string;
+  reference_number: string;
+  status: TrackingStatus | null;
+  status_label: string;
+  source: TrackingSource | null;
+  source_label: string;
+  manually_updated: boolean;
+  checked_at: string | null;
+  automatic_available: boolean;
+  fallback_url: string;
+}
+
+export interface TrackingJourneyStep {
+  code: string;
+  label: string;
+  state: TrackingJourneyState;
+}
+
+export interface ApplicationTracking {
+  application_id: number;
+  application_reference: string;
+  service_name: string;
+  client_name: string;
+  internal_status: InternalStatusSummary;
+  provider: TrackingProviderCode | string;
+  reference_number: string;
+  passport_masked: string;
+  has_date_of_birth: boolean;
+  country: string;
+  application_centre: string;
+  tracking_enabled: boolean;
+  status: TrackingStatus | null;
+  status_label: string;
+  source: TrackingSource | null;
+  source_label: string;
+  manually_updated: boolean;
+  updated_by_name: string | null;
+  manual_note: string;
+  checked_at: string | null;
+  status_changed_at: string | null;
+  next_refresh_at: string | null;
+  automatic_available: boolean;
+  fallback_url: string;
+  error_code: string | null;
+  error_detail: string | null;
+  journey: TrackingJourneyStep[];
+  can_refresh: boolean;
+  can_edit_details: boolean;
+  can_manual_update: boolean;
+}
+
+export interface ApplicationTrackingHistoryItem {
+  id: number;
+  provider: string;
+  status: TrackingStatus | string;
+  status_label: string;
+  source: TrackingSource | string;
+  source_label: string;
+  manually_updated: boolean;
+  updated_by_name: string | null;
+  note: string;
+  checked_at: string;
+  created_at: string;
+}
+
+export interface ExternalTrackingAdminRow {
+  id: number;
+  tracking_id: number;
+  client_name: string;
+  application_reference: string;
+  service_name: string;
+  reference_number: string;
+  status: TrackingStatus | null;
+  status_label: string;
+  source: TrackingSource | null;
+  checked_at: string | null;
+  health: TrackingHealth;
+  health_label: string;
+  tracking_enabled: boolean;
+}
+
+export interface TrackingDetailsUpdate {
+  reference_number?: string;
+  passport_number?: string;
+  date_of_birth?: string;
+  country?: string;
+  application_centre?: string;
+  tracking_enabled?: boolean;
+  provider?: TrackingProviderCode;
+}
+
+export interface ManualTrackingUpdate {
+  status_code: TrackingStatus;
+  status_label?: string;
+  note?: string;
+}
+
+export interface ExternalTrackingSettings {
+  provider: string;
+  automatic_tracking: boolean;
+  automatic_check_interval_hours: number;
+  manual_refresh_cooldown_minutes: number;
+  fallback_url: string;
+  store_raw_status: boolean;
+  status_mapping: Record<string, TrackingStatus | string>;
+}
+
 export interface ApplicationList {
   id: number;
   reference: string;
@@ -259,6 +409,7 @@ export interface ApplicationList {
   progress: number;
   next_action: string;
   document_counts: DocumentCounts;
+  external_tracking: ExternalTrackingSummary | null;
   created_at: string;
   updated_at: string;
 }
@@ -613,7 +764,7 @@ export interface Category {
   description: string;
 }
 
-export interface ArticleList {
+export interface ArticleList extends SeoFields {
   id: number;
   title: string;
   slug: string;
@@ -622,8 +773,10 @@ export interface ArticleList {
   cover_image: string | null;
   is_featured: boolean;
   published_at: string | null;
-  seo_title: string;
-  seo_description: string;
+  last_reviewed_at: string | null;
+  author_name: string;
+  reviewer_name: string;
+  updated_at: string;
 }
 
 export interface ArticleDetail extends ArticleList {
@@ -631,16 +784,43 @@ export interface ArticleDetail extends ArticleList {
   is_published: boolean;
 }
 
-export interface CmsPage {
+export interface CmsPage extends SeoFields {
   id: number;
   slug: string;
   title: string;
   excerpt: string;
   body: string;
-  seo_title: string;
-  seo_description: string;
   is_published: boolean;
   updated_at: string;
+}
+
+export interface SeoLandingList extends SeoFields {
+  id: number;
+  kind: "country" | "location";
+  slug: string;
+  title: string;
+  excerpt: string;
+  is_published: boolean;
+  updated_at: string;
+}
+
+export interface SeoLandingDetail extends SeoLandingList {
+  body: string;
+  audience: string;
+  pathways: string;
+  documents: string;
+  official_sources: OfficialSource[] | JsonValue;
+  faqs: LandingFaq[] | JsonValue;
+  related_service_slugs: string[];
+  related_article_slugs: string[];
+}
+
+export interface PublicSeoIndex {
+  settings: { [key: string]: JsonValue };
+  pages: CmsPage[];
+  services: ServiceList[];
+  articles: ArticleList[];
+  landings: SeoLandingList[];
 }
 
 export interface SiteSetting {
@@ -674,6 +854,8 @@ export interface HomeContent {
   faqs: FAQ[];
   testimonials: Testimonial[];
   featured_articles: ArticleList[];
+  country_landings?: SeoLandingList[];
+  location_landings?: SeoLandingList[];
 }
 
 export interface ClientProfileUpdate {

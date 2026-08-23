@@ -1,4 +1,6 @@
 from datetime import timedelta
+
+from celery.schedules import crontab
 from pathlib import Path
 import os
 import sys
@@ -19,7 +21,7 @@ APPEND_SLASH = False
 FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL", "http://localhost:3000").rstrip("/")
 BACKEND_BASE_URL = os.getenv("BACKEND_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
 
-_default_allowed_hosts = ["localhost", "127.0.0.1", "[::1]", "testserver"]
+_default_allowed_hosts = ["localhost", "127.0.0.1", "[::1]", "testserver", "kudya.pythonanywhere.com"]
 _env_allowed_hosts = [item.strip() for item in os.getenv("ALLOWED_HOSTS", "").split(",") if item.strip()]
 ALLOWED_HOSTS = sorted(set([*_default_allowed_hosts, *_env_allowed_hosts]))
 
@@ -101,6 +103,16 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "Africa/Johannesburg"
+CELERY_BEAT_SCHEDULE = {
+    "poll-external-application-tracking": {
+        "task": "apps.applications.tasks.poll_external_application_tracking",
+        "schedule": crontab(minute=15),
+    },
+}
+
+FIELD_ENCRYPTION_KEY = os.getenv("FIELD_ENCRYPTION_KEY", "").strip()
+VFS_TRACKING_API_BASE_URL = os.getenv("VFS_TRACKING_API_BASE_URL", "").strip()
+VFS_TRACKING_API_KEY = os.getenv("VFS_TRACKING_API_KEY", "").strip()
 
 if REDIS_URL and not REDIS_URL.startswith("memory://"):
     CACHES = {
@@ -245,6 +257,8 @@ SPECTACULAR_SETTINGS = {
 if MZANSI_PRODUCTION:
     if SECRET_KEY in {"", "dev-only-change-me", "change-me-to-a-long-random-string"}:
         raise RuntimeError("DJANGO_SECRET_KEY must be set to a strong value in production.")
+    if not FIELD_ENCRYPTION_KEY:
+        raise RuntimeError("FIELD_ENCRYPTION_KEY must be set in production.")
     if DEBUG:
         raise RuntimeError("DJANGO_DEBUG must be false in production.")
     SECURE_SSL_REDIRECT = os.getenv("DJANGO_SECURE_SSL_REDIRECT", "true").lower() in ("1", "true", "yes")
@@ -277,6 +291,8 @@ _LOCAL_DEV_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://127.0.0.1:3001",
     "http://localhost:8081",
+    "https://mzansi-pi.vercel.app",
+    "https://kudya.pythonanywhere.com",
 ]
 _extra_cors = [item.strip() for item in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if item.strip()]
 CORS_ALLOWED_ORIGINS = sorted(set([*_LOCAL_DEV_ORIGINS, *_extra_cors]))

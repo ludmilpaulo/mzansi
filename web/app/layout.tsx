@@ -3,6 +3,8 @@ import { Instrument_Serif, Plus_Jakarta_Sans } from "next/font/google";
 import type { ReactNode } from "react";
 
 import { StoreProvider } from "@/store/store-provider";
+import { getSiteUrl } from "@/lib/api";
+import { generatePageMetadata } from "@/lib/seo";
 
 import "./globals.css";
 
@@ -20,16 +22,13 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: {
-    default: "Mzansi Visa Solutions",
-    template: "%s | Mzansi Visa Solutions",
-  },
-  description: "Professional South African visa and immigration assistance. We prepare, guide, and track — government decisions remain with the authorities.",
-  openGraph: {
-    title: "Mzansi Visa Solutions",
-    description: "Professional South African visa and immigration assistance.",
-    type: "website",
-  },
+  metadataBase: new URL(getSiteUrl()),
+  ...generatePageMetadata({
+    title: "Mzansi Visa Solutions | South Africa Visa & Immigration Services",
+    description:
+      "Professional South Africa visa and immigration assistance for temporary residence, permanent residence, waivers, permits and consultations. Government decisions remain with the authorities.",
+    path: "/",
+  }),
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

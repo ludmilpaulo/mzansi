@@ -33,8 +33,12 @@ import type {
   DocumentReviewRequest,
   DocumentSubmission,
   DocumentType,
+  ExternalTrackingAdminRow,
   FAQ,
   HomeContent,
+  PublicSeoIndex,
+  SeoLandingDetail,
+  SeoLandingList,
   Inquiry,
   InquiryCreateRequest,
   InquirySetStatusRequest,
@@ -57,9 +61,14 @@ import type {
   SendMessageRequest,
   ServiceDetail,
   ServiceList,
+  ApplicationTracking,
+  ApplicationTrackingHistoryItem,
+  ManualTrackingUpdate,
+  SiteSetting,
   StaffClient,
   StaffUser,
   Testimonial,
+  TrackingDetailsUpdate,
 } from "@/types/api";
 
 export const api = createApi({
@@ -83,6 +92,7 @@ export const api = createApi({
     "Report",
     "Audit",
     "DocumentType",
+    "Tracking",
   ],
   endpoints: (builder) => ({
     register: builder.mutation<RegisterResponse, RegisterRequest>({
@@ -138,6 +148,35 @@ export const api = createApi({
       query: (slug) => `/content/articles/${slug}`,
       providesTags: ["Content"],
     }),
+    getPublicSeo: builder.query<PublicSeoIndex, void>({
+      query: () => "/content/settings/public-seo",
+      providesTags: ["Content"],
+    }),
+    getLandings: builder.query<SeoLandingList[], { kind?: "country" | "location" } | void>({
+      query: (args) => ({ url: "/content/landings", params: args ?? undefined }),
+      transformResponse: (response: unknown) => asList<SeoLandingList>(response),
+      providesTags: ["Content"],
+    }),
+    getLanding: builder.query<SeoLandingDetail, string>({
+      query: (slug) => `/content/landings/${slug}`,
+      providesTags: (_result, _error, slug) => [{ type: "Content", id: slug }],
+    }),
+    updateLanding: builder.mutation<SeoLandingDetail, { slug: string; body: Partial<SeoLandingDetail> }>({
+      query: ({ slug, body }) => ({ url: `/content/landings/${slug}`, method: "PATCH", body }),
+      invalidatesTags: ["Content"],
+    }),
+    updatePage: builder.mutation<CmsPage, { slug: string; body: Partial<CmsPage> }>({
+      query: ({ slug, body }) => ({ url: `/content/pages/${slug}`, method: "PATCH", body }),
+      invalidatesTags: ["Content"],
+    }),
+    updateArticle: builder.mutation<ArticleDetail, { slug: string; body: Partial<ArticleDetail> }>({
+      query: ({ slug, body }) => ({ url: `/content/articles/${slug}`, method: "PATCH", body }),
+      invalidatesTags: ["Content"],
+    }),
+    updateService: builder.mutation<ServiceDetail, { slug: string; body: Partial<ServiceDetail> }>({
+      query: ({ slug, body }) => ({ url: `/services/${slug}`, method: "PATCH", body }),
+      invalidatesTags: ["Service", "Content"],
+    }),
     getConsultationTypes: builder.query<ConsultationType[], void>({
       query: () => "/consultation-types",
       transformResponse: (response: unknown) => asList<ConsultationType>(response),
@@ -178,6 +217,42 @@ export const api = createApi({
     getApplicationStatuses: builder.query<ApplicationStatus[], void>({
       query: () => "/application-statuses",
       transformResponse: (response: unknown) => asList<ApplicationStatus>(response),
+    }),
+    getApplicationTracking: builder.query<ApplicationTracking, number>({
+      query: (id) => `/applications/${id}/tracking`,
+      providesTags: (_result, _error, id) => [
+        { type: "Tracking", id },
+        { type: "Application", id },
+      ],
+    }),
+    updateApplicationTracking: builder.mutation<ApplicationTracking, { id: number; body: TrackingDetailsUpdate }>({
+      query: ({ id, body }) => ({ url: `/applications/${id}/tracking`, method: "PATCH", body }),
+      invalidatesTags: (_result, _error, arg) => ["Application", "Tracking", { type: "Tracking", id: arg.id }, { type: "Application", id: arg.id }],
+    }),
+    refreshApplicationTracking: builder.mutation<ApplicationTracking, number>({
+      query: (id) => ({ url: `/applications/${id}/tracking/refresh`, method: "POST" }),
+      invalidatesTags: (_result, _error, id) => ["Application", "Tracking", { type: "Tracking", id }, { type: "Application", id }],
+    }),
+    getApplicationTrackingHistory: builder.query<ApplicationTrackingHistoryItem[], number>({
+      query: (id) => `/applications/${id}/tracking/history`,
+      providesTags: (_result, _error, id) => [{ type: "Tracking", id }],
+    }),
+    recordManualTracking: builder.mutation<ApplicationTracking, { id: number; body: ManualTrackingUpdate }>({
+      query: ({ id, body }) => ({ url: `/applications/${id}/tracking/manual`, method: "POST", body }),
+      invalidatesTags: (_result, _error, arg) => ["Application", "Tracking", { type: "Tracking", id: arg.id }, { type: "Application", id: arg.id }],
+    }),
+    getExternalTrackingAdmin: builder.query<Paginated<ExternalTrackingAdminRow>, { search?: string; page?: number } | void>({
+      query: (args) => ({ url: "/admin/applications/external-tracking", params: args ?? undefined }),
+      transformResponse: (response: unknown) => asPage<ExternalTrackingAdminRow>(response),
+      providesTags: ["Tracking"],
+    }),
+    getSiteSetting: builder.query<SiteSetting, string>({
+      query: (key) => `/content/settings/${key}`,
+      providesTags: (_result, _error, key) => [{ type: "Content", id: key }],
+    }),
+    updateSiteSetting: builder.mutation<SiteSetting, { key: string; value: SiteSetting["value"]; description?: string }>({
+      query: ({ key, ...body }) => ({ url: `/content/settings/${key}`, method: "PATCH", body }),
+      invalidatesTags: (_result, _error, arg) => ["Content", { type: "Content", id: arg.key }],
     }),
     getDocuments: builder.query<Paginated<DocumentSubmission>, DocumentQuery | void>({
       query: (args) => ({ url: "/documents", params: args ?? undefined }),
@@ -329,6 +404,13 @@ export const {
   useGetTestimonialsQuery,
   useGetArticlesQuery,
   useGetArticleQuery,
+  useGetPublicSeoQuery,
+  useGetLandingsQuery,
+  useGetLandingQuery,
+  useUpdateLandingMutation,
+  useUpdatePageMutation,
+  useUpdateArticleMutation,
+  useUpdateServiceMutation,
   useGetConsultationTypesQuery,
   useGetConsultantsQuery,
   useGetDashboardQuery,
@@ -339,6 +421,14 @@ export const {
   useAssignApplicationMutation,
   useAddApplicationNoteMutation,
   useGetApplicationStatusesQuery,
+  useGetApplicationTrackingQuery,
+  useUpdateApplicationTrackingMutation,
+  useRefreshApplicationTrackingMutation,
+  useGetApplicationTrackingHistoryQuery,
+  useRecordManualTrackingMutation,
+  useGetExternalTrackingAdminQuery,
+  useGetSiteSettingQuery,
+  useUpdateSiteSettingMutation,
   useGetDocumentsQuery,
   useUploadDocumentMutation,
   useReviewDocumentMutation,

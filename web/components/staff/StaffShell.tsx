@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   LogOut,
   Newspaper,
+  Search,
   Users,
 } from "lucide-react";
 
@@ -27,6 +28,7 @@ const LINKS = [
   { href: "/staff/consultations", label: "Consultations", icon: Calendar },
   { href: "/staff/inquiries", label: "Inquiries", icon: Inbox },
   { href: "/staff/content", label: "Content", icon: Newspaper },
+  { href: "/staff/seo", label: "Search", icon: Search },
   { href: "/staff/reports", label: "Reports", icon: BarChart3 },
 ];
 

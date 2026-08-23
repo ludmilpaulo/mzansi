@@ -288,7 +288,7 @@ export function FeaturedArticles({ articles }: { articles: ArticleList[] }) {
     <section className="page-shell pb-20">
       <div className="flex items-end justify-between gap-4">
         <SectionHeading eyebrow="Resources" title="From the desk" />
-        <Link href="/resources" className="text-sm font-semibold text-brand">
+        <Link href="/immigration-guides" className="text-sm font-semibold text-brand">
           All resources
         </Link>
       </div>

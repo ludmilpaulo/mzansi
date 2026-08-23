@@ -5,6 +5,7 @@ import { LoginForm } from "@/app/(public)/login/LoginForm";
 export const metadata: Metadata = {
   title: "Sign in",
   description: "Sign in to the Mzansi Visa Solutions client portal or staff workspace.",
+  robots: { index: false, follow: false },
 };
 
 export default function LoginPage() {

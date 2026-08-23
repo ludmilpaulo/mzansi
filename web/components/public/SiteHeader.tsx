@@ -14,8 +14,9 @@ import type { BrandSettings } from "@/types/api";
 
 const LINKS = [
   { href: "/services", label: "Services" },
+  { href: "/immigration-guides", label: "Guides" },
+  { href: "/countries", label: "Countries" },
   { href: "/about", label: "About" },
-  { href: "/resources", label: "Resources" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
 ];

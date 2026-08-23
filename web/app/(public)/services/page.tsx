@@ -1,25 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { Breadcrumbs } from "@/components/public/Breadcrumbs";
 import { ServiceIcon } from "@/components/icons/ServiceIcon";
 import { Card, CardBody } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { asList } from "@/lib/api";
 import { getErrorMessage } from "@/lib/errors";
+import { loadSeoDefaults } from "@/lib/public-seo";
 import { serverGet } from "@/lib/server-api";
+import { generatePageMetadata, routeSeo } from "@/lib/seo";
 import type { ServiceList } from "@/types/api";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Services",
-  description: "South African visa and immigration services prepared with a clear checklist and consultant oversight.",
-  openGraph: {
-    title: "Services | Mzansi Visa Solutions",
-    description: "South African visa and immigration services.",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const defaults = await loadSeoDefaults();
+  const route = routeSeo(defaults, "services");
+  return generatePageMetadata({ title: route.title, description: route.description, path: "/services" }, defaults);
+}
 
 export default async function ServicesPage() {
   let services: ServiceList[] | null = null;
@@ -38,7 +38,8 @@ export default async function ServicesPage() {
   }
   return (
     <div className="page-shell py-20">
-      <p className="eyebrow">Services</p>
+      <Breadcrumbs items={[{ name: "Services", path: "/services" }]} />
+      <p className="eyebrow mt-6">Services</p>
       <h1 className="mt-3 max-w-3xl font-serif text-5xl text-navy md:text-6xl">Immigration pathways we support</h1>
       <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
         Each service has its own evidence checklist. Requirements change — we keep yours current and do not promise

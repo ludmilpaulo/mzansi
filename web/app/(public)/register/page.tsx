@@ -5,6 +5,7 @@ import { RegisterForm } from "@/app/(public)/register/RegisterForm";
 export const metadata: Metadata = {
   title: "Create account",
   description: "Open a client profile to book consultations and, when ready, start an application.",
+  robots: { index: false, follow: false },
 };
 
 export default function RegisterPage() {

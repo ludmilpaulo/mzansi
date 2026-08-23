@@ -2,9 +2,10 @@ from django.db import models
 from django.utils.text import slugify
 
 from apps.common.models import TimeStampedModel
+from apps.common.seo import SearchMetadataMixin
 
 
-class Service(TimeStampedModel):
+class Service(SearchMetadataMixin, TimeStampedModel):
     name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True, max_length=255)
     short_description = models.CharField(max_length=400)
@@ -19,6 +20,9 @@ class Service(TimeStampedModel):
     sort_order = models.PositiveSmallIntegerField(default=0)
     seo_title = models.CharField(max_length=255, blank=True)
     seo_description = models.CharField(max_length=320, blank=True)
+    how_we_help = models.TextField(blank=True)
+    official_sources = models.JSONField(default=list, blank=True)
+    related_service_slugs = models.JSONField(default=list, blank=True)
 
     class Meta:
         ordering = ["sort_order", "name"]
