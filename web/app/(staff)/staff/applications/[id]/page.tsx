@@ -12,6 +12,7 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Select } from "@/components/ui/Select";
 import { Spinner } from "@/components/ui/Spinner";
 import { Textarea } from "@/components/ui/Textarea";
+import { StaffTrackingPanel } from "@/components/tracking/StaffTrackingPanel";
 import { Timeline } from "@/components/ui/Timeline";
 import { cn } from "@/lib/cn";
 import { formatDateTime } from "@/lib/dates";
@@ -157,6 +158,8 @@ export default function StaffApplicationDetailPage() {
           </CardBody>
         </Card>
       </div>
+
+      <StaffTrackingPanel applicationId={id} />
 
       <Card>
         <CardHeader>

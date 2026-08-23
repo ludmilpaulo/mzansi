@@ -38,7 +38,7 @@ export default async function LocationsPage() {
   return (
     <div className="page-shell py-20">
       <Breadcrumbs items={[{ name: "Locations", path: "/locations" }]} />
-      <h1 className="mt-6 font-serif text-5xl text-navy">Consultations by city</h1>
+      <h1 className="mt-6 text-5xl text-navy">Consultations by city</h1>
       <p className="mt-4 max-w-2xl text-lg text-muted">
         We only publish city pages for places we actually serve. Cape Town is our practice base.
       </p>

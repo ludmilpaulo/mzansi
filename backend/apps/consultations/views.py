@@ -11,7 +11,6 @@ from apps.audit.services import log_action
 from apps.consultations.models import Appointment, BlockedDate, ConsultationType
 from apps.consultations.serializers import AppointmentSerializer, BlockedDateSerializer, ConsultationTypeSerializer
 from apps.notifications.services import notify_user
-from apps.staff.models import StaffProfile
 from config.permissions import IsAdminRole, IsStaffUser
 
 
@@ -70,38 +69,22 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             category="consultation",
         )
 
-    @action(detail=False, methods=["get"])
+    @action(detail=False, methods=["get"], permission_classes=[AllowAny])
     def slots(self, request):
+        from apps.consultations.services import list_available_slots
+
         consultant_id = request.query_params.get("consultant_id")
         date_str = request.query_params.get("date")
         type_id = request.query_params.get("consultation_type_id")
         if not (consultant_id and date_str):
             return Response({"detail": "consultant_id and date are required."}, status=400)
         day = datetime.strptime(date_str, "%Y-%m-%d").date()
-        if BlockedDate.objects.filter(date=day).filter(models_q(consultant_id)).exists():
-            return Response([])
         consultation = ConsultationType.objects.filter(pk=type_id).first() if type_id else None
-        duration = consultation.duration_minutes if consultation else 45
-        profile = StaffProfile.objects.filter(user_id=consultant_id).first()
-        weekday = day.strftime("%A").lower()
-        windows = (profile.working_hours or {}).get(weekday) if profile else None
-        if not windows:
-            windows = [["09:00", "17:00"]]
-        booked = Appointment.objects.filter(
-            consultant_id=consultant_id,
-            starts_at__date=day,
-        ).exclude(status=Appointment.Status.CANCELLED)
-        slots = []
-        for start_s, end_s in windows:
-            start_h, start_m = [int(p) for p in start_s.split(":")]
-            end_h, end_m = [int(p) for p in end_s.split(":")]
-            cursor = timezone.make_aware(datetime(day.year, day.month, day.day, start_h, start_m))
-            end = timezone.make_aware(datetime(day.year, day.month, day.day, end_h, end_m))
-            while cursor + timedelta(minutes=duration) <= end:
-                taken = booked.filter(starts_at__lt=cursor + timedelta(minutes=duration), ends_at__gt=cursor).exists()
-                if not taken and cursor > timezone.now():
-                    slots.append({"starts_at": cursor.isoformat(), "ends_at": (cursor + timedelta(minutes=duration)).isoformat()})
-                cursor += timedelta(minutes=duration)
+        slots = list_available_slots(
+            consultant_id=int(consultant_id),
+            day=day,
+            consultation_type=consultation,
+        )
         return Response(slots)
 
     @action(detail=True, methods=["post"])

@@ -39,7 +39,7 @@ export function BrandMark({
         <span className="sr-only">{name}</span>
       ) : (
         <span className="min-w-0">
-          <span className={cn("block truncate font-serif text-[1.35rem] leading-none", invert ? "text-white" : "text-navy")}>
+          <span className={cn("block truncate font-display text-[1.2rem] font-semibold leading-none", invert ? "text-white" : "text-navy")}>
             {lead}
           </span>
           {rest ? (

@@ -31,12 +31,58 @@ class Page(SearchMetadataMixin, TimeStampedModel):
 class FAQ(TimeStampedModel):
     question = models.CharField(max_length=400)
     answer = models.TextField()
-    category = models.CharField(max_length=64, default="general")
+    category = models.CharField(max_length=64, default="general", db_index=True)
+    related_service = models.ForeignKey(
+        "services.Service",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="global_faqs",
+    )
     sort_order = models.PositiveSmallIntegerField(default=0)
     is_active = models.BooleanField(default=True)
+    last_reviewed_at = models.DateTimeField(null=True, blank=True)
+    next_review_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.CharField(max_length=128, blank=True)
 
     class Meta:
         ordering = ["sort_order", "id"]
+
+
+class TermsDocument(TimeStampedModel):
+    version = models.CharField(max_length=32, unique=True)
+    title = models.CharField(max_length=255, default="Terms & Conditions")
+    body = models.TextField()
+    effective_date = models.DateField()
+    is_published = models.BooleanField(default=False)
+    summary = models.CharField(max_length=500, blank=True)
+
+    class Meta:
+        ordering = ["-effective_date", "-id"]
+
+    def __str__(self) -> str:
+        return f"{self.title} ({self.version})"
+
+
+class LegalAcceptance(TimeStampedModel):
+    user = models.ForeignKey("accounts.User", on_delete=models.CASCADE, related_name="legal_acceptances")
+    terms = models.ForeignKey(TermsDocument, on_delete=models.PROTECT, related_name="acceptances", null=True, blank=True)
+    terms_version = models.CharField(max_length=32)
+    privacy_version = models.CharField(max_length=32, blank=True)
+    source = models.CharField(max_length=64, default="consultation_booking")
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.CharField(max_length=512, blank=True)
+    appointment = models.ForeignKey(
+        "consultations.Appointment",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="legal_acceptances",
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["user", "terms_version"])]
 
 
 class Testimonial(TimeStampedModel):

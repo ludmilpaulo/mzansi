@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.content.models import Article, Category, FAQ, Page, SeoLanding, SiteSetting, Testimonial
+from apps.content.models import Article, Category, FAQ, LegalAcceptance, Page, SeoLanding, SiteSetting, TermsDocument, Testimonial
 
 SEO_FIELDSET = (
     "Search",
@@ -38,7 +38,22 @@ class PageAdmin(admin.ModelAdmin):
 
 @admin.register(FAQ)
 class FAQAdmin(admin.ModelAdmin):
-    list_display = ("question", "category", "is_active")
+    list_display = ("question", "category", "is_active", "last_reviewed_at", "next_review_at")
+    list_filter = ("category", "is_active")
+    search_fields = ("question", "answer")
+
+
+@admin.register(TermsDocument)
+class TermsDocumentAdmin(admin.ModelAdmin):
+    list_display = ("version", "title", "effective_date", "is_published")
+    list_filter = ("is_published",)
+
+
+@admin.register(LegalAcceptance)
+class LegalAcceptanceAdmin(admin.ModelAdmin):
+    list_display = ("user", "terms_version", "source", "created_at")
+    search_fields = ("user__email", "terms_version")
+    readonly_fields = ("user", "terms", "terms_version", "privacy_version", "source", "ip_address", "user_agent", "appointment", "created_at", "updated_at")
 
 
 @admin.register(Testimonial)

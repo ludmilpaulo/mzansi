@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
 
 import { OrganizationJsonLd, ProfessionalServiceJsonLd, WebSiteJsonLd } from "@/components/public/JsonLd";
+import { PathwayFinder } from "@/components/public/PathwayFinder";
 import {
   ContactCta,
   FeaturedArticles,
   HomeFaq,
   HomeHeroSection,
   HowItWorksSection,
+  InternationalSection,
   PortalCta,
   ServicesGrid,
   TestimonialsSection,
+  TrackingSection,
   TrustStrip,
   WhyChooseUs,
 } from "@/components/public/HomeSections";
@@ -18,9 +21,16 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { getErrorMessage } from "@/lib/errors";
 import {
   brandFromHome,
+  consultationCtaFromHome,
   disclaimerFromHome,
+  featuredServicesFromHome,
   heroFromHome,
   howItWorksFromHome,
+  internationalFromHome,
+  knowledgeHubFromHome,
+  pathwayFromHome,
+  portalCtaFromHome,
+  trackingCtaFromHome,
   trustFromHome,
   whyChooseFromHome,
 } from "@/lib/content";
@@ -75,22 +85,28 @@ export default async function HomePage() {
   const brand = brandFromHome(home);
   const hero = heroFromHome(home);
   const disclaimer = disclaimerFromHome(home);
+  const pathway = pathwayFromHome(home);
   return (
-    <>
+    <div className="page-enter">
       <OrganizationJsonLd brand={brand} />
       <WebSiteJsonLd brand={brand} />
       <ProfessionalServiceJsonLd brand={brand} />
       {hero ? <HomeHeroSection hero={hero} trust={trustFromHome(home)} /> : null}
       <TrustStrip points={trustFromHome(home)} />
-      <ServicesGrid services={home.services} />
+      <ServicesGrid services={home.services} config={featuredServicesFromHome(home)} />
+      {pathway ? <PathwayFinder guidance={pathway} /> : null}
       <HowItWorksSection steps={howItWorksFromHome(home)} />
-      <PortalCta />
+      <PortalCta content={portalCtaFromHome(home)} />
+      <TrackingSection content={trackingCtaFromHome(home)} />
       <WhyChooseUs points={whyChooseFromHome(home)} />
+      <InternationalSection content={internationalFromHome(home)} landings={home.country_landings ?? []} />
+      <FeaturedArticles articles={home.featured_articles} hub={knowledgeHubFromHome(home)} />
       <TestimonialsSection testimonials={home.testimonials} />
       <HomeFaq faqs={home.faqs} />
-      <FeaturedArticles articles={home.featured_articles} />
-      <ContactCta brand={brand} />
-      {disclaimer ? <p className="mx-auto max-w-6xl px-6 pb-12 text-xs text-muted">{disclaimer.text}</p> : null}
-    </>
+      <ContactCta brand={brand} content={consultationCtaFromHome(home)} />
+      {disclaimer ? (
+        <p className="page-shell pb-12 pt-6 text-xs leading-relaxed text-muted">{disclaimer.text}</p>
+      ) : null}
+    </div>
   );
 }

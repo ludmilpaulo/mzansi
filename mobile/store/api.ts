@@ -6,6 +6,7 @@ import type {
   ApplicationDashboard,
   ApplicationDetail,
   ApplicationList,
+  ApplicationTracking,
   Appointment,
   AppointmentCreateRequest,
   AppointmentSlot,
@@ -106,6 +107,16 @@ export const api = createApi({
       query: (id) => `/applications/${id}`,
       transformResponse: (response: unknown) => unwrapEnvelope<ApplicationDetail>(response),
       providesTags: (_result, _error, id) => [{ type: "Application", id }],
+    }),
+    getApplicationTracking: builder.query<ApplicationTracking, number>({
+      query: (id) => `/applications/${id}/tracking`,
+      transformResponse: (response: unknown) => unwrapEnvelope<ApplicationTracking>(response),
+      providesTags: (_result, _error, id) => [{ type: "Application", id }, "Application"],
+    }),
+    refreshApplicationTracking: builder.mutation<ApplicationTracking, number>({
+      query: (id) => ({ url: `/applications/${id}/tracking/refresh`, method: "POST" }),
+      transformResponse: (response: unknown) => unwrapEnvelope<ApplicationTracking>(response),
+      invalidatesTags: (_result, _error, id) => [{ type: "Application", id }, "Application"],
     }),
     createApplication: builder.mutation<ApplicationDetail, ApplicationCreateRequest>({
       query: (body) => ({ url: "/applications", method: "POST", body }),
@@ -228,6 +239,8 @@ export const {
   useGetDashboardQuery,
   useGetApplicationsQuery,
   useGetApplicationQuery,
+  useGetApplicationTrackingQuery,
+  useRefreshApplicationTrackingMutation,
   useCreateApplicationMutation,
   useGetDocumentsQuery,
   useUploadDocumentMutation,

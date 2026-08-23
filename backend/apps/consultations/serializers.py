@@ -54,6 +54,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
         model = Appointment
         fields = (
             "id",
+            "reference_number",
             "client",
             "client_id",
             "client_name",
@@ -64,14 +65,26 @@ class AppointmentSerializer(serializers.ModelSerializer):
             "application",
             "starts_at",
             "ends_at",
+            "timezone_name",
             "status",
             "meeting_link",
             "client_notes",
             "staff_notes",
             "cancelled_reason",
+            "calendar_token",
             "created_at",
         )
-        read_only_fields = ("id", "client", "ends_at", "status", "created_at", "staff_notes")
+        read_only_fields = (
+            "id",
+            "reference_number",
+            "client",
+            "ends_at",
+            "status",
+            "created_at",
+            "staff_notes",
+            "calendar_token",
+            "timezone_name",
+        )
 
     def validate(self, attrs):
         starts_at = attrs.get("starts_at") or getattr(self.instance, "starts_at", None)

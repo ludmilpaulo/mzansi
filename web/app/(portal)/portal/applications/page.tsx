@@ -61,7 +61,12 @@ export default function PortalApplicationsPage() {
             columns={[
               { key: "ref", header: "Reference", render: (row) => row.reference },
               { key: "service", header: "Service", render: (row) => row.service.name },
-              { key: "status", header: "Status", render: (row) => <Badge>{row.status.label}</Badge> },
+              { key: "status", header: "Mzansi status", render: (row) => <Badge>{row.status.label}</Badge> },
+              {
+                key: "vfs",
+                header: "VFS status",
+                render: (row) => row.external_tracking?.status_label || "—",
+              },
               { key: "progress", header: "Progress", render: (row) => `${row.progress}%` },
               { key: "updated", header: "Updated", render: (row) => formatDate(row.updated_at) },
             ]}

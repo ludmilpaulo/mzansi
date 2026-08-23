@@ -38,3 +38,21 @@ class ServiceUnavailable(APIException):
     status_code = status.HTTP_503_SERVICE_UNAVAILABLE
     default_detail = "Service temporarily unavailable."
     default_code = "service_unavailable"
+
+
+class TrackingRateLimited(APIException):
+    status_code = status.HTTP_429_TOO_MANY_REQUESTS
+    default_detail = "Your application was checked recently. Please try again later."
+    default_code = "rate_limited"
+
+
+class TrackingIntegrationUnavailable(APIException):
+    status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+    default_detail = "Automatic tracking is temporarily unavailable."
+    default_code = "integration_unavailable"
+
+
+class TrackingInvalidReference(APIException):
+    status_code = status.HTTP_404_NOT_FOUND
+    default_detail = "We could not find an application using the provided details. Please verify your information."
+    default_code = "invalid_reference"

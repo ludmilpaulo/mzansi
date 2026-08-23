@@ -71,7 +71,7 @@ export default async function ServiceDetailPage({ params }: Params) {
     : [];
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-20">
+    <div className="page-shell page-enter max-w-4xl py-20">
       <ServiceJsonLd name={service.name} description={service.short_description} path={`/services/${service.slug}`} />
       <FaqPageJsonLd faqs={faqs.map((item) => ({ question: item.question, answer: item.answer }))} />
       <Breadcrumbs
@@ -80,37 +80,37 @@ export default async function ServiceDetailPage({ params }: Params) {
           { name: service.name, path: `/services/${service.slug}` },
         ]}
       />
-      <h1 className="mt-6 font-serif text-5xl text-navy">{service.name}</h1>
+      <h1 className="mt-6 text-5xl text-navy">{service.name}</h1>
       <p className="mt-4 text-lg text-muted">{service.short_description}</p>
       <div className="prose mt-10 max-w-none text-charcoal">
         <p className="whitespace-pre-wrap leading-relaxed">{service.description}</p>
       </div>
       {service.who_its_for ? (
         <section className="mt-12">
-          <h2 className="font-serif text-3xl text-navy">Who may need this service</h2>
+          <h2 className="text-3xl text-navy">Who may need this service</h2>
           <p className="mt-3 whitespace-pre-wrap text-muted">{service.who_its_for}</p>
         </section>
       ) : null}
       {service.process_overview ? (
         <section className="mt-12">
-          <h2 className="font-serif text-3xl text-navy">Application process</h2>
+          <h2 className="text-3xl text-navy">Application process</h2>
           <p className="mt-3 whitespace-pre-wrap text-muted">{service.process_overview}</p>
         </section>
       ) : null}
       {service.how_we_help ? (
         <section className="mt-12">
-          <h2 className="font-serif text-3xl text-navy">How Mzansi Visa Solutions helps</h2>
+          <h2 className="text-3xl text-navy">How Mzansi Visa Solutions helps</h2>
           <p className="mt-3 whitespace-pre-wrap text-muted">{service.how_we_help}</p>
         </section>
       ) : null}
       {service.estimated_processing ? (
         <section className="mt-12">
-          <h2 className="font-serif text-3xl text-navy">Processing considerations</h2>
+          <h2 className="text-3xl text-navy">Processing considerations</h2>
           <p className="mt-3 text-muted">{service.estimated_processing}</p>
         </section>
       ) : null}
       <section className="mt-12">
-        <h2 className="font-serif text-3xl text-navy">Typical documents</h2>
+        <h2 className="text-3xl text-navy">Typical documents</h2>
         {service.requirements.length === 0 ? (
           <p className="mt-3 text-sm text-muted">A consultant will confirm the checklist for your circumstances.</p>
         ) : (
@@ -126,7 +126,7 @@ export default async function ServiceDetailPage({ params }: Params) {
       </section>
       {sources.length > 0 ? (
         <section className="mt-12">
-          <h2 className="font-serif text-3xl text-navy">Official sources</h2>
+          <h2 className="text-3xl text-navy">Official sources</h2>
           <ul className="mt-4 space-y-2">
             {sources.map((source) => (
               <li key={source.url}>
@@ -140,13 +140,13 @@ export default async function ServiceDetailPage({ params }: Params) {
       ) : null}
       {faqs.length > 0 ? (
         <section className="mt-12">
-          <h2 className="mb-6 font-serif text-3xl text-navy">Frequently asked questions</h2>
+          <h2 className="mb-6 text-3xl text-navy">Frequently asked questions</h2>
           <FaqAccordion faqs={faqs} />
         </section>
       ) : null}
       {related.length > 0 ? (
         <section className="mt-12">
-          <h2 className="font-serif text-3xl text-navy">Related services</h2>
+          <h2 className="text-3xl text-navy">Related services</h2>
           <ul className="mt-4 space-y-2">
             {related.map((item) => (
               <li key={item.slug}>
@@ -161,7 +161,7 @@ export default async function ServiceDetailPage({ params }: Params) {
       <Card className="mt-12 bg-soft">
         <CardBody className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
           <p className="text-navy">Book an immigration consultation to discuss whether this pathway is realistic.</p>
-          <Button href="/contact">Book a consultation</Button>
+          <Button href="/book">Book a consultation</Button>
         </CardBody>
       </Card>
     </div>

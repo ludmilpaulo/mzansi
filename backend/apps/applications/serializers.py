@@ -64,6 +64,7 @@ class ApplicationListSerializer(serializers.ModelSerializer):
     client_email = serializers.EmailField(source="client.email", read_only=True)
     consultant_name = serializers.CharField(source="assigned_consultant.full_name", read_only=True, default=None)
     document_counts = serializers.SerializerMethodField()
+    external_tracking = serializers.SerializerMethodField()
 
     class Meta:
         model = Application
@@ -80,9 +81,15 @@ class ApplicationListSerializer(serializers.ModelSerializer):
             "progress",
             "next_action",
             "document_counts",
+            "external_tracking",
             "created_at",
             "updated_at",
         )
+
+    def get_external_tracking(self, obj: Application):
+        from apps.applications.tracking.service import serialize_tracking_summary
+
+        return serialize_tracking_summary(obj)
 
     def get_document_counts(self, obj: Application) -> dict[str, int]:
         docs = list(obj.documents.all()) if hasattr(obj, "_prefetched_objects_cache") and "documents" in obj._prefetched_objects_cache else list(obj.documents.all())

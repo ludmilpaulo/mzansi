@@ -32,7 +32,7 @@ type LinkButtonProps = SharedProps & { href: string };
 
 export function Button({ variant = "primary", size = "md", className, children, ...props }: ButtonProps | LinkButtonProps) {
   const classes = cn(
-    "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 disabled:pointer-events-none disabled:opacity-50",
+    "inline-flex items-center justify-center gap-2 rounded-[13px] font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
     variants[variant],
     sizes[size],
     className,

@@ -2,6 +2,7 @@ import type {
   ApiErrorBody,
   ApiFailure,
   ApiSuccess,
+  AppointmentSlot,
   FieldErrors,
   JsonObject,
   JsonValue,
@@ -114,10 +115,12 @@ export function asPage<T>(data: unknown): Paginated<T> {
 
 export function readApiError(value: unknown): ApiErrorBody {
   if (isApiFailure(value)) {
+    const alternatives = Array.isArray(value.error.alternatives) ? value.error.alternatives : undefined;
     return {
       code: value.error.code,
       detail: value.error.detail,
       fields: value.error.fields && isFieldErrors(value.error.fields) ? value.error.fields : undefined,
+      alternatives,
     };
   }
   if (isRecord(value) && isRecord(value.error)) {
@@ -127,11 +130,18 @@ export function readApiError(value: unknown): ApiErrorBody {
         code: typeof error.code === "string" ? error.code : "error",
         detail: error.detail,
         fields: isFieldErrors(error.fields) ? error.fields : undefined,
+        alternatives: Array.isArray(error.alternatives) ? (error.alternatives as AppointmentSlot[]) : undefined,
       };
     }
   }
   if (isRecord(value) && typeof value.detail === "string") {
-    return { code: "error", detail: value.detail };
+    const alternatives = Array.isArray(value.alternatives) ? (value.alternatives as AppointmentSlot[]) : undefined;
+    return {
+      code: typeof value.code === "string" ? value.code : "error",
+      detail: value.detail,
+      fields: isFieldErrors(value.fields) ? value.fields : undefined,
+      alternatives,
+    };
   }
   return { code: "error", detail: "Request failed." };
 }

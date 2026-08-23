@@ -82,3 +82,22 @@ class LoginEvent(TimeStampedModel):
 
     class Meta:
         ordering = ["-created_at"]
+
+
+class AccountActivationToken(TimeStampedModel):
+    """One-time account activation after guest consultation booking. Expires in 72 hours."""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="activation_tokens")
+    token_hash = models.CharField(max_length=128)
+    expires_at = models.DateTimeField(db_index=True)
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["user", "expires_at"])]
+
+    @property
+    def is_valid(self) -> bool:
+        from django.utils import timezone
+
+        return self.used_at is None and self.expires_at > timezone.now()

@@ -65,7 +65,12 @@ function ApplicationsTable() {
       { key: "ref", header: "Reference", render: (row: ApplicationList) => row.reference },
       { key: "client", header: "Client", render: (row: ApplicationList) => `${row.client_name}` },
       { key: "service", header: "Service", render: (row: ApplicationList) => row.service.name },
-      { key: "status", header: "Status", render: (row: ApplicationList) => <Badge>{row.status.label}</Badge> },
+      { key: "status", header: "Mzansi status", render: (row: ApplicationList) => <Badge>{row.status.label}</Badge> },
+      {
+        key: "vfs",
+        header: "VFS status",
+        render: (row: ApplicationList) => row.external_tracking?.status_label || "—",
+      },
       { key: "consultant", header: "Consultant", render: (row: ApplicationList) => row.consultant_name ?? "—" },
       { key: "progress", header: "Progress", render: (row: ApplicationList) => `${row.progress}%` },
       { key: "updated", header: "Updated", render: (row: ApplicationList) => formatDate(row.updated_at) },

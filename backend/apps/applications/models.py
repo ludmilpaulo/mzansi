@@ -116,3 +116,78 @@ class ApplicationTask(TimeStampedModel):
 
     class Meta:
         ordering = ["status", "due_date", "id"]
+
+
+class TrackingProvider(models.TextChoices):
+    VFS = "VFS", "VFS Global"
+    DHA = "DHA", "Department of Home Affairs"
+    MANUAL = "MANUAL", "Manual"
+
+
+class ExternalStatusCode(models.TextChoices):
+    APPLICATION_RECEIVED = "APPLICATION_RECEIVED", "Application Received"
+    APPLICATION_UNDER_PROCESS = "APPLICATION_UNDER_PROCESS", "Application Under Process"
+    DECISION_RETURNED = "DECISION_RETURNED", "Decision Returned"
+    READY_FOR_COLLECTION = "READY_FOR_COLLECTION", "Ready for Collection"
+    UNKNOWN = "UNKNOWN", "Unknown"
+
+
+class TrackingSource(models.TextChoices):
+    API = "API", "Official API"
+    MANUAL = "MANUAL", "Manual update"
+    UNAVAILABLE = "UNAVAILABLE", "Integration unavailable"
+
+
+class ApplicationExternalTracking(TimeStampedModel):
+    application = models.OneToOneField(Application, on_delete=models.CASCADE, related_name="external_tracking")
+    provider = models.CharField(max_length=16, choices=TrackingProvider.choices, default=TrackingProvider.VFS)
+    tracking_enabled = models.BooleanField(default=False)
+    country = models.CharField(max_length=128, default="South Africa")
+    application_centre = models.CharField(max_length=128, default="Cape Town")
+    reference_number = models.CharField(max_length=64, blank=True, db_index=True)
+    passport_encrypted = models.TextField(blank=True)
+    passport_last4 = models.CharField(max_length=8, blank=True)
+    date_of_birth_encrypted = models.TextField(blank=True)
+    current_status_code = models.CharField(max_length=64, choices=ExternalStatusCode.choices, blank=True)
+    current_status_label = models.CharField(max_length=255, blank=True)
+    status_source = models.CharField(max_length=16, choices=TrackingSource.choices, blank=True)
+    last_checked_at = models.DateTimeField(null=True, blank=True)
+    last_status_changed_at = models.DateTimeField(null=True, blank=True)
+    last_manual_refresh_at = models.DateTimeField(null=True, blank=True)
+    last_error_code = models.CharField(max_length=64, blank=True)
+    last_error_detail = models.CharField(max_length=255, blank=True)
+    last_updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="external_tracking_updates",
+    )
+    last_manual_note = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-updated_at"]
+
+    def __str__(self) -> str:
+        return f"{self.application.reference} · {self.provider}"
+
+
+class ExternalApplicationStatus(TimeStampedModel):
+    application = models.ForeignKey(Application, on_delete=models.CASCADE, related_name="external_statuses")
+    provider = models.CharField(max_length=50)
+    status_code = models.CharField(max_length=100)
+    status_label = models.CharField(max_length=255)
+    source = models.CharField(max_length=16, choices=TrackingSource.choices)
+    raw_status_encrypted = models.TextField(blank=True)
+    note = models.TextField(blank=True)
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="external_status_updates",
+    )
+    checked_at = models.DateTimeField()
+
+    class Meta:
+        ordering = ["-checked_at", "-id"]

@@ -62,7 +62,10 @@ export function HomeScreen({ navigation }: HomeScreenProps<"HomeHome">) {
           <Text style={styles.meta}>
             {active.reference} · {active.service.name} · {active.status.label}
           </Text>
+          <Text style={styles.meta}>Mzansi status: {active.status.label}</Text>
+          <Text style={styles.meta}>VFS status: {active.external_tracking?.status_label || "Not linked yet"}</Text>
           <ProgressBar value={active.progress} label="Application progress" />
+          <Button title="View full tracking" variant="secondary" onPress={() => navigation.navigate("ApplicationTracking", { id: active.id })} />
           <View style={styles.counts}>
             <Count label="Documents" value={active.document_counts.total} />
             <Count label="Verified" value={active.document_counts.verified} />

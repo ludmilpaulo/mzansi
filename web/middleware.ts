@@ -7,7 +7,7 @@ export function middleware(request: NextRequest) {
   const role = request.cookies.get("mzansi.role")?.value;
   const { pathname } = request.nextUrl;
 
-  if (pathname.startsWith("/portal")) {
+  if (pathname.startsWith("/portal") || pathname.startsWith("/dashboard")) {
     if (!role) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
@@ -35,5 +35,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/portal/:path*", "/staff/:path*"],
+  matcher: ["/portal/:path*", "/dashboard/:path*", "/staff/:path*"],
 };

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 
-from apps.accounts.models import LoginEvent, User
+from apps.accounts.models import AccountActivationToken, LoginEvent, User
 
 
 @admin.register(User)
@@ -27,3 +27,9 @@ class LoginEventAdmin(admin.ModelAdmin):
     list_filter = ("success",)
     search_fields = ("email",)
     readonly_fields = ("user", "email", "success", "ip_address", "user_agent", "reason", "created_at", "updated_at")
+
+
+@admin.register(AccountActivationToken)
+class AccountActivationTokenAdmin(admin.ModelAdmin):
+    list_display = ("user", "expires_at", "used_at", "created_at")
+    readonly_fields = ("user", "token_hash", "expires_at", "used_at", "created_at", "updated_at")

@@ -205,6 +205,9 @@ class Command(BaseCommand):
         self._services()
         self._consultations()
         self._content()
+        from apps.content.seed_legal import seed_legal_and_faqs
+
+        seed_legal_and_faqs()
         self._emails()
         if options["with_demo_users"]:
             self._demo_users()
@@ -284,6 +287,35 @@ class Command(BaseCommand):
                     "sort_order": index,
                 },
             )
+        # Public booking needs at least one consultant with working hours.
+        consultant, created = User.objects.get_or_create(
+            email="consultant@mzansivisa.co.za",
+            defaults={
+                "first_name": "Sarah",
+                "last_name": "Smith",
+                "role": User.Role.CONSULTANT,
+                "is_staff": True,
+                "is_email_verified": True,
+            },
+        )
+        if created:
+            consultant.set_unusable_password()
+            consultant.save(update_fields=["password"])
+        else:
+            consultant.role = User.Role.CONSULTANT
+            consultant.is_staff = True
+            consultant.save(update_fields=["role", "is_staff"])
+        StaffProfile.objects.update_or_create(
+            user=consultant,
+            defaults={
+                "job_title": "Immigration Consultant",
+                "bio": "Assists clients with temporary and permanent residence matters.",
+                "accepts_consultations": True,
+                "working_hours": {
+                    day: [["09:00", "16:00"]] for day in ["monday", "tuesday", "wednesday", "thursday", "friday"]
+                },
+            },
+        )
 
     def _content(self):
         SiteSetting.objects.update_or_create(
@@ -306,14 +338,14 @@ class Command(BaseCommand):
             key="home_hero",
             defaults={
                 "value": {
-                    "eyebrow": "South African visa & immigration services",
+                    "eyebrow": "South African immigration",
                     "title": "Your Immigration Journey, Handled With Confidence.",
-                    "subtitle": "Professional visa and immigration solutions for your next chapter. We prepare, guide, and track — government decisions remain with the Department of Home Affairs.",
+                    "subtitle": "Professional visa and immigration assistance for individuals, families and businesses. We prepare, guide and track — government decisions remain with the relevant authorities.",
                     "primary_cta_label": "Book a Consultation",
-                    "primary_cta_href": "/contact",
-                    "secondary_cta_label": "Explore Our Services",
+                    "primary_cta_href": "/book",
+                    "secondary_cta_label": "Explore Services",
                     "secondary_cta_href": "/services",
-                    "image_url": "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=2000&q=80",
+                    "image_url": "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?auto=format&fit=crop&w=1800&q=80",
                 }
             },
         )
@@ -321,9 +353,11 @@ class Command(BaseCommand):
             key="trust_points",
             defaults={
                 "value": [
-                    {"title": "Professional", "body": "Consultant-led case management with clear next actions."},
-                    {"title": "Secure", "body": "Private document storage and role-based access."},
-                    {"title": "Client-focused", "body": "A portal that shows exactly what you need to do next."},
+                    {"title": "Professional guidance", "body": "Consultant-led advice with a realistic next step."},
+                    {"title": "Secure documents", "body": "Private storage and role-based staff access."},
+                    {"title": "Clear communication", "body": "Messages and requests stay with your case."},
+                    {"title": "Application tracking", "body": "See your Mzansi case stage in the portal."},
+                    {"title": "Client portal", "body": "Checklists, uploads and consultations in one place."},
                 ]
             },
         )
@@ -331,10 +365,155 @@ class Command(BaseCommand):
             key="why_choose",
             defaults={
                 "value": [
-                    {"title": "Clear next actions", "body": "Clients always see what to upload or wait for — not a pile of emails."},
-                    {"title": "Secure document handling", "body": "Immigration documents stay private, with staff access limited by role."},
-                    {"title": "Honest guidance", "body": "We explain options and limits. Government decisions remain with Home Affairs."},
+                    {"title": "Professional guidance", "body": "We explain published options and limits before you spend time on the wrong pathway."},
+                    {"title": "Secure document management", "body": "Immigration files stay private. Access is limited to authorised staff on your matter."},
+                    {"title": "Transparent communication", "body": "Requests, rejections and replies live in the portal instead of scattered email threads."},
+                    {"title": "Application tracking", "body": "Your Mzansi case stage is visible. Official VFS or DHA status is shown separately when linked."},
+                    {"title": "Personalised case management", "body": "A consultant maps the checklist to your circumstances and keeps it current when rules change."},
+                    {"title": "International client support", "body": "Clients can work with us from outside South Africa. We do not claim offices in every country."},
                 ]
+            },
+        )
+        SiteSetting.objects.update_or_create(
+            key="featured_services",
+            defaults={
+                "value": {
+                    "featured_slugs": ["permanent-residence-permit", "temporary-residence-permit"],
+                    "featured_title": "Featured services",
+                    "featured_body": "Permanent and temporary residence are the pathways most clients start with. Other permits are listed below.",
+                    "other_title": "Other immigration services",
+                }
+            },
+        )
+        SiteSetting.objects.update_or_create(
+            key="pathway_guidance",
+            defaults={
+                "value": {
+                    "title": "Not sure which visa you need?",
+                    "body": "Answer one question and we will point you to a relevant Mzansi service page. This is an initial guidance tool, not an official government eligibility determination.",
+                    "disclaimer": "Home Affairs decides applications. This tool does not assess eligibility or replace a consultation.",
+                    "continue_label": "Continue",
+                    "options": [
+                        {"label": "Work", "href": "/services/temporary-residence-permit"},
+                        {"label": "Study", "href": "/services/temporary-residence-permit"},
+                        {"label": "Visit", "href": "/services/temporary-residence-permit"},
+                        {"label": "Join family", "href": "/services/temporary-residence-permit"},
+                        {"label": "Start a business", "href": "/services/temporary-residence-permit"},
+                        {"label": "Apply for permanent residence", "href": "/services/permanent-residence-permit"},
+                        {"label": "Other", "href": "/contact"},
+                    ],
+                }
+            },
+        )
+        SiteSetting.objects.update_or_create(
+            key="portal_cta",
+            defaults={
+                "value": {
+                    "title": "Your entire immigration journey in one place.",
+                    "body": "Track your application, upload documents, receive requests, communicate with your consultant and stay informed from anywhere in the world.",
+                    "cta_label": "Access Client Portal",
+                    "cta_href": "/login",
+                }
+            },
+        )
+        SiteSetting.objects.update_or_create(
+            key="tracking_cta",
+            defaults={
+                "value": {
+                    "title": "Know where your application stands.",
+                    "body": "The client portal shows your Mzansi case stage and the next action. When a VFS reference is linked, you can also open the official tracking page. We do not invent official statuses.",
+                    "cta_label": "Track My Application",
+                    "cta_href": "/login?next=/portal/applications",
+                }
+            },
+        )
+        SiteSetting.objects.update_or_create(
+            key="international",
+            defaults={
+                "value": {
+                    "title": "From anywhere in the world to your next chapter in South Africa.",
+                    "body": "We serve clients internationally from our Cape Town practice. Country notes exist only where we have unique, maintained information. A listed region is not an office.",
+                    "regions": [
+                        {"title": "Africa", "href": "/countries"},
+                        {"title": "Europe", "href": "/countries"},
+                        {"title": "North America", "href": "/countries"},
+                        {"title": "South America", "href": "/countries"},
+                        {"title": "Asia", "href": "/countries"},
+                        {"title": "Middle East", "href": "/countries"},
+                        {"title": "Oceania", "href": "/countries"},
+                    ],
+                }
+            },
+        )
+        SiteSetting.objects.update_or_create(
+            key="knowledge_hub",
+            defaults={
+                "value": {
+                    "title": "Immigration Knowledge Hub",
+                    "body": "Guides from our practice, linked to official sources. Informational only — not government publications.",
+                    "categories": [
+                        {"title": "Visa Guides", "href": "/immigration-guides"},
+                        {"title": "Permanent Residence", "href": "/services/permanent-residence-permit"},
+                        {"title": "Temporary Residence", "href": "/services/temporary-residence-permit"},
+                        {"title": "Waivers", "href": "/services/waiver-exemption-applications"},
+                        {"title": "Permits", "href": "/services"},
+                        {"title": "FAQs", "href": "/faq"},
+                    ],
+                }
+            },
+        )
+        SiteSetting.objects.update_or_create(
+            key="consultation_cta",
+            defaults={
+                "value": {
+                    "eyebrow": "Ready to move forward?",
+                    "title": "Let's understand your situation and identify the appropriate next step.",
+                    "body": "A consultation is a structured conversation about your nationality, status and goal. It is not a Home Affairs appointment and it does not guarantee a visa outcome.",
+                    "cta_label": "Book a Consultation",
+                    "cta_href": "/book",
+                    "notes": ["No pressure.", "Clear guidance.", "Professional support."],
+                }
+            },
+        )
+        SiteSetting.objects.update_or_create(
+            key="about_page",
+            defaults={
+                "value": {
+                    "eyebrow": "About us",
+                    "title": "A South African immigration practice built around clarity and care.",
+                    "intro": "Mzansi Visa Solutions helps individuals, families and businesses prepare South African visa and permit applications. We combine consultant-led guidance with a secure client portal so you always know the next action.",
+                    "team_note": "Consultant profiles are shared when you book. We do not publish unverified biographies or invented credentials on this website.",
+                    "sections": [
+                        {
+                            "title": "Who we are",
+                            "body": "We are a South African immigration services practice based in Cape Town. We prepare files, explain published options, and keep clients informed. We are not a government office and we do not decide applications.",
+                        },
+                        {
+                            "title": "Our approach",
+                            "body": "Start with facts: nationality, current status, family situation and intended purpose. Then we map a realistic pathway, a document checklist, and the limits we can see. If a route looks weak, we say so before you spend money on it.",
+                        },
+                        {
+                            "title": "Why clients choose us",
+                            "body": "Clients come to us for organised casework: a living checklist, private document storage, and a portal that shows what to do next. They stay because we do not over-promise official outcomes.",
+                        },
+                        {
+                            "title": "Our process",
+                            "body": "Consultation, assessment, documents, application preparation, follow-up and outcome recording. You can see the stage in the portal. Official processing times sit with Home Affairs or the visa facilitation centre.",
+                        },
+                        {
+                            "title": "Our values",
+                            "body": "Honesty over sales language. Confidentiality over convenience. Completeness over speed that skips evidence. International clients are welcome; we still work from South African official rules.",
+                        },
+                        {
+                            "title": "Client experience",
+                            "body": "After you register you have a profile, not automatically an application. When you instruct us, uploads, messages and consultation notes stay attached to the case so you are not reconstructing a story from email.",
+                        },
+                        {
+                            "title": "Security and confidentiality",
+                            "body": "Immigration documents are stored privately and are not served as public files. Staff access is role-restricted. We process personal information to deliver the service you request and to meet legal obligations.",
+                        },
+                    ],
+                }
             },
         )
         SiteSetting.objects.update_or_create(
@@ -432,10 +611,20 @@ class Command(BaseCommand):
             },
         )
         pages = [
-            ("about", "About Us", "Mzansi Visa Solutions is a South African immigration services practice helping clients navigate visas, permits, and related applications with clarity and care."),
+            (
+                "about",
+                "About Us",
+                "Mzansi Visa Solutions is a South African immigration services practice based in Cape Town. "
+                "We help individuals, families and businesses prepare visa, permit and related applications with a clear checklist and a secure client portal. "
+                "We explain published options and limits. We do not guarantee visa, permit or permanent residence approval — those decisions remain with the Department of Home Affairs and other relevant authorities.\n\n"
+                "Our work typically follows consultation, assessment, document collection, application preparation, follow-up and outcome recording. "
+                "Clients outside South Africa can work with us remotely. We only publish office locations we actually serve.\n\n"
+                "Consultant introductions happen when you book. This page does not list invented team biographies. "
+                "For how we handle personal information, see the Privacy Policy.",
+            ),
             ("privacy", "Privacy Policy", "We process personal information and immigration documents only to deliver the services you request, to meet legal obligations, and to keep your account secure. Documents are stored privately and access is role-restricted."),
             ("terms", "Terms of Service", "By using this platform you agree that Mzansi Visa Solutions provides professional assistance only. Government fees, biometrics, and official decisions sit outside our control. Service descriptions on this site are informational and may be updated."),
-            ("contact", "Contact", "Book a consultation or send a message. We respond during business hours, Africa/Johannesburg."),
+            ("contact", "Let's talk about your immigration journey.", "Book a consultation or send us an enquiry. We respond during business hours, Africa/Johannesburg. A consultation is not a Home Affairs appointment and does not guarantee an outcome."),
         ]
         page_seo = {
             "about": ("About Mzansi Visa Solutions", "Who we are, how we work, and why we never promise visa or permanent residence approval."),
@@ -460,7 +649,10 @@ class Command(BaseCommand):
             )
         faqs = [
             ("Do you guarantee visa approval?", "No. We never promise approval. We prepare complete, professional applications and keep you informed."),
+            ("How does the consultation work?", "You choose a consultation type and an available time. We discuss your nationality, status and goal, then explain realistic options and the documents usually required. It is not a Home Affairs appointment and it does not decide an application."),
             ("How do I track my application?", "The client portal shows your Mzansi case status. When a VFS reference is linked, you can also open the official VFS Global tracking page from your application. Mzansi case status and VFS status are shown separately."),
+            ("Can I upload documents online?", "Yes. After you have an application, the portal shows a private checklist. You upload each requested item there. If something is rejected, you will see the reason and can replace the file."),
+            ("Can I communicate with my consultant online?", "Yes. Messages stay attached to your case in the client portal so the conversation is not scattered across personal email."),
             ("Is my passport copy safe?", "Documents are stored in private storage and are only accessible to authorised staff assigned to your matter."),
             ("Can I book a consultation online?", "Yes. Choose a consultation type, date, and available consultant from the booking page."),
             ("What if a document is rejected?", "You will see the reason and can upload a replacement immediately from the portal or app."),
@@ -488,7 +680,7 @@ class Command(BaseCommand):
                 "slug": "how-to-prepare-for-a-visa-consultation",
                 "title": "How to prepare for a visa consultation",
                 "excerpt": "Bring the facts of your stay, travel history, and current permit so we can give useful guidance.",
-                "body": "A useful consultation starts with accurate facts: your nationality, current status, family situation, and what you hope to achieve. Bring copies of your passport and current permit if you have them. Write down questions about work, study, family, or long-term stay. We will explain options and limitations without promising outcomes. Official criteria sit with the Department of Home Affairs; we help you understand how those criteria apply to your circumstances.",
+                "body": "A useful consultation starts with accurate facts: your nationality, current status, family situation, and what you hope to achieve. Bring copies of your passport and current permit if you have them. Write down questions about work, study, family, or long-term stay. We will explain options and limitations without promising outcomes. Official criteria sit with the Department of Home Affairs; we help you understand how those criteria apply to your circumstances.\n\nIf you are joining from another country, note your current location and any previous South African status. We can work remotely. The consultation is still not a government appointment.",
                 "category": guides,
                 "featured": True,
                 "seo_title": "How to Prepare for a South Africa Visa Consultation",
@@ -516,6 +708,28 @@ class Command(BaseCommand):
                 "seo_title": "How Long Does a South African Visa Application Take?",
                 "seo_description": "Why South African visa timelines split into preparation and official processing, and why we do not guarantee dates.",
                 "focus": "South African visa processing time",
+            },
+            {
+                "slug": "how-the-mzansi-client-portal-works",
+                "title": "How the Mzansi client portal works",
+                "excerpt": "Register for a profile, then use one place for documents, messages, consultations and case status.",
+                "body": "The client portal is the operational heart of a Mzansi matter. Creating an account opens a profile only. An application appears after you choose a service and we begin work. From there you can upload requested documents, see why an item was rejected, message your consultant, book a consultation, and view your Mzansi case stage. When a VFS reference is later linked, you can open the official tracking page — Mzansi status and VFS status are not the same thing. Use the portal rather than sending passports or bank statements over unsecured email.",
+                "category": application_cat,
+                "featured": True,
+                "seo_title": "How the Mzansi Visa Solutions Client Portal Works",
+                "seo_description": "What the Mzansi client portal is for: documents, messages, consultations and case tracking — without promising official outcomes.",
+                "focus": "Mzansi client portal",
+            },
+            {
+                "slug": "applying-for-a-south-african-visa-from-abroad",
+                "title": "Applying for a South African visa from abroad",
+                "excerpt": "Many categories can be lodged from outside South Africa. The correct channel depends on nationality, location and visa type.",
+                "body": "Applicants often ask whether they must be in South Africa to start. Frequently the answer is no: visa facilitation centres and missions handle many categories from the country where you are lawfully present. The correct channel, biometrics location, and whether a change of status is possible inside South Africa are official questions. They depend on your nationality, current status, and the published category. We help you read those instructions and prepare a complete file. We cannot move a government queue or create a channel that does not exist. Confirm the lodging route in consultation against current Department and VFS information.",
+                "category": guides,
+                "featured": False,
+                "seo_title": "Applying for a South African Visa from Abroad",
+                "seo_description": "How South African visa lodging from another country usually works, and why the channel depends on official rules.",
+                "focus": "South African visa from abroad",
             },
         ]
         for item in articles:

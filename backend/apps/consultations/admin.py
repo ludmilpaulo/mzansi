@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.consultations.models import Appointment, BlockedDate, ConsultationType
+from apps.consultations.models import Appointment, BlockedDate, ConsultationType, SlotHold
 
 
 @admin.register(ConsultationType)
@@ -16,5 +16,12 @@ class BlockedDateAdmin(admin.ModelAdmin):
 
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):
-    list_display = ("client", "consultant", "consultation_type", "starts_at", "status")
+    list_display = ("reference_number", "client", "consultant", "consultation_type", "starts_at", "status")
     list_filter = ("status",)
+    search_fields = ("reference_number", "client__email", "client__first_name", "client__last_name")
+
+
+@admin.register(SlotHold)
+class SlotHoldAdmin(admin.ModelAdmin):
+    list_display = ("consultant", "starts_at", "expires_at", "converted")
+    list_filter = ("converted",)

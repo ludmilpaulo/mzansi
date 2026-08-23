@@ -231,6 +231,68 @@ export interface ApplicationTask {
   created_at: string;
 }
 
+export type TrackingStatus =
+  | "APPLICATION_RECEIVED"
+  | "APPLICATION_UNDER_PROCESS"
+  | "DECISION_RETURNED"
+  | "READY_FOR_COLLECTION"
+  | "UNKNOWN";
+
+export type TrackingJourneyState = "complete" | "current" | "upcoming";
+
+export interface ExternalTrackingSummary {
+  enabled: boolean;
+  provider: string;
+  reference_number: string;
+  status: TrackingStatus | null;
+  status_label: string;
+  source: string | null;
+  source_label: string;
+  manually_updated: boolean;
+  checked_at: string | null;
+  automatic_available: boolean;
+  fallback_url: string;
+}
+
+export interface TrackingJourneyStep {
+  code: string;
+  label: string;
+  state: TrackingJourneyState;
+}
+
+export interface ApplicationTracking {
+  application_id: number;
+  application_reference: string;
+  service_name: string;
+  client_name: string;
+  internal_status: { code: string; label: string };
+  provider: string;
+  reference_number: string;
+  passport_masked: string;
+  has_date_of_birth: boolean;
+  country: string;
+  application_centre: string;
+  tracking_enabled: boolean;
+  status: TrackingStatus | null;
+  status_label: string;
+  source: string | null;
+  source_label: string;
+  manually_updated: boolean;
+  updated_by_name: string | null;
+  manual_note: string;
+  checked_at: string | null;
+  status_changed_at: string | null;
+  next_refresh_at: string | null;
+  automatic_available: boolean;
+  fallback_url: string;
+  error_code: string | null;
+  error_detail: string | null;
+  journey: TrackingJourneyStep[];
+  can_refresh: boolean;
+  can_edit_details: boolean;
+  can_manual_update: boolean;
+}
+
 export interface ApplicationList {
   id: number;
   reference: string;
@@ -244,6 +306,7 @@ export interface ApplicationList {
   progress: number;
   next_action: string;
   document_counts: DocumentCounts;
+  external_tracking: ExternalTrackingSummary | null;
   created_at: string;
   updated_at: string;
 }

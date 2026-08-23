@@ -112,7 +112,7 @@ export function LandingView({
       <Card className="mt-12 bg-soft">
         <CardBody className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
           <p className="text-navy">Speak with a consultant about whether a pathway is realistic for your circumstances.</p>
-          <Button href="/contact">Book a consultation</Button>
+          <Button href="/book">Book a consultation</Button>
         </CardBody>
       </Card>
     </article>

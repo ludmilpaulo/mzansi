@@ -55,9 +55,9 @@ export async function CmsPageView({ slug }: { slug: string }) {
     );
   }
   return (
-    <article className="mx-auto max-w-3xl px-6 py-20">
+    <article className="page-shell page-enter max-w-3xl py-20">
       <Breadcrumbs items={[{ name: page.title, path: `/${page.slug}` }]} />
-      <h1 className="mt-6 font-serif text-5xl text-navy">{page.title}</h1>
+      <h1 className="mt-6 text-5xl text-navy">{page.title}</h1>
       {page.excerpt ? <p className="mt-4 text-lg text-muted">{page.excerpt}</p> : null}
       <div className="mt-10 whitespace-pre-wrap text-base leading-relaxed text-charcoal">{page.body}</div>
     </article>

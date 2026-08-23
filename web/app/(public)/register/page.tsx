@@ -13,7 +13,7 @@ export default function RegisterPage() {
     <div className="page-shell grid gap-12 py-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
       <div className="lg:sticky lg:top-28">
         <p className="eyebrow">Client registration</p>
-        <h1 className="mt-3 font-serif text-5xl text-navy">Create a client account</h1>
+        <h1 className="mt-3 text-5xl text-navy">Create a client account</h1>
         <p className="mt-4 text-base leading-relaxed text-muted">
           We will open a profile. An application is created only after you choose a service — we never promise visa
           approval.

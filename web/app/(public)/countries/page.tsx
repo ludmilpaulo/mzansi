@@ -38,7 +38,7 @@ export default async function CountriesPage() {
   return (
     <div className="page-shell py-20">
       <Breadcrumbs items={[{ name: "Countries", path: "/countries" }]} />
-      <h1 className="mt-6 font-serif text-5xl text-navy">South Africa immigration by nationality</h1>
+      <h1 className="mt-6 text-5xl text-navy">South Africa immigration by nationality</h1>
       <p className="mt-4 max-w-2xl text-lg text-muted">
         These pages exist only where we have unique, maintained information. We do not publish near-identical country
         copies to chase keywords.

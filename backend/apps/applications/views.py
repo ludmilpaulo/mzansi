@@ -3,9 +3,10 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from apps.accounts.models import User
-from apps.applications.models import Application, ApplicationNote, ApplicationStatus, ApplicationTask
+from apps.applications.models import Application, ApplicationExternalTracking, ApplicationNote, ApplicationStatus, ApplicationTask
 from apps.applications.serializers import (
     ApplicationCreateSerializer,
     ApplicationDetailSerializer,
@@ -15,9 +16,18 @@ from apps.applications.serializers import (
     ApplicationTaskSerializer,
 )
 from apps.applications.services import refresh_progress, transition_application
+from apps.applications.tracking.service import (
+    record_manual_status,
+    refresh_external_status,
+    serialize_admin_row,
+    serialize_history,
+    serialize_tracking,
+    update_tracking_details,
+)
 from apps.audit.services import log_action
 from apps.documents.models import DocumentSubmission
 from apps.notifications.services import notify_user
+from config.pagination import StandardResultsPagination
 from config.permissions import ADMIN_ROLES, IsConsultantRole, IsStaffUser
 
 
@@ -29,6 +39,7 @@ def scoped_applications(user):
         "status",
         "assigned_consultant",
         "assigned_reviewer",
+        "external_tracking",
     ).prefetch_related(
         Prefetch("documents", queryset=DocumentSubmission.objects.select_related("document_type")),
         "timeline__status",
@@ -180,3 +191,77 @@ class ApplicationViewSet(viewsets.ModelViewSet):
             refresh_progress(active)
             data["active_application"] = ApplicationDetailSerializer(active, context={"request": request}).data
         return Response(data)
+
+    @action(detail=True, methods=["get", "patch"], url_path="tracking")
+    def tracking(self, request, pk=None):
+        application = self.get_object()
+        if request.method == "PATCH":
+            update_tracking_details(application, actor=request.user, data=request.data)
+            application.refresh_from_db()
+        return Response(serialize_tracking(application, viewer=request.user))
+
+    @action(detail=True, methods=["post"], url_path="tracking/refresh")
+    def tracking_refresh(self, request, pk=None):
+        application = self.get_object()
+        refresh_external_status(application, actor=request.user)
+        application.refresh_from_db()
+        return Response(serialize_tracking(application, viewer=request.user))
+
+    @action(detail=True, methods=["get"], url_path="tracking/history")
+    def tracking_history(self, request, pk=None):
+        application = self.get_object()
+        return Response(serialize_history(application))
+
+    @action(detail=True, methods=["post"], url_path="tracking/manual", permission_classes=[IsAuthenticated, IsConsultantRole])
+    def tracking_manual(self, request, pk=None):
+        application = self.get_object()
+        record_manual_status(
+            application,
+            actor=request.user,
+            status_code=str(request.data.get("status_code") or ""),
+            note=str(request.data.get("note") or ""),
+            status_label=str(request.data.get("status_label") or ""),
+        )
+        application.refresh_from_db()
+        return Response(serialize_tracking(application, viewer=request.user))
+
+
+class ExternalTrackingAdminViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated, IsStaffUser]
+    pagination_class = StandardResultsPagination
+
+    def list(self, request):
+        qs = (
+            ApplicationExternalTracking.objects.select_related(
+                "application",
+                "application__client",
+                "application__service",
+            )
+            .filter(Q(tracking_enabled=True) | ~Q(reference_number=""))
+            .order_by("-updated_at")
+        )
+        search = request.query_params.get("search")
+        if search:
+            qs = qs.filter(
+                Q(reference_number__icontains=search)
+                | Q(application__reference__icontains=search)
+                | Q(application__client__first_name__icontains=search)
+                | Q(application__client__last_name__icontains=search)
+                | Q(application__client__email__icontains=search)
+            )
+        paginator = StandardResultsPagination()
+        page = paginator.paginate_queryset(qs, request)
+        rows = [serialize_admin_row(item) for item in page]
+        return paginator.get_paginated_response(rows)
+
+
+class AdminTrackingRefreshView(APIView):
+    permission_classes = [IsAuthenticated, IsConsultantRole]
+
+    def post(self, request, pk: int):
+        application = scoped_applications(request.user).filter(pk=pk).first()
+        if application is None:
+            return Response({"detail": "Application not found."}, status=404)
+        refresh_external_status(application, actor=request.user)
+        application.refresh_from_db()
+        return Response(serialize_tracking(application, viewer=request.user))

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 
-import { BookingForm } from "@/components/forms/BookingForm";
 import { InquiryForm } from "@/components/forms/InquiryForm";
+import { Button } from "@/components/ui/Button";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { isClientUser } from "@/lib/roles";
 import { useAppSelector } from "@/store/hooks";
@@ -14,31 +14,22 @@ export function ContactForms() {
   const canSubmit = hydrated && isClientUser(user);
 
   return (
-    <div className="mt-12 grid gap-8 lg:grid-cols-2">
+    <div className="grid gap-8">
       <Card>
         <CardHeader>
-          <h2 className="font-serif text-2xl text-navy">Book a consultation</h2>
+          <h2 className="text-2xl text-navy">Book a consultation</h2>
         </CardHeader>
-        <CardBody>
-          {canSubmit ? (
-            <BookingForm />
-          ) : (
-            <p className="text-sm text-muted">
-              <Link href="/login?next=/contact" className="text-brand">
-                Sign in
-              </Link>{" "}
-              or{" "}
-              <Link href="/register?next=/contact" className="text-brand">
-                create a client account
-              </Link>{" "}
-              to request a consultation time.
-            </p>
-          )}
+        <CardBody className="space-y-4">
+          <p className="text-sm text-muted">
+            You can book a consultation without creating an account. After confirmation, new clients receive a secure activation link to set
+            their own password.
+          </p>
+          <Button href="/book">Book a Consultation</Button>
         </CardBody>
       </Card>
       <Card>
         <CardHeader>
-          <h2 className="font-serif text-2xl text-navy">Send an enquiry</h2>
+          <h2 className="text-2xl text-navy">Send an enquiry</h2>
         </CardHeader>
         <CardBody>
           {canSubmit ? (

@@ -58,7 +58,7 @@ export default async function ArticlePage({ params }: Params) {
     );
   }
   return (
-    <article className="mx-auto max-w-3xl px-6 py-20">
+    <article className="page-shell page-enter max-w-3xl py-20">
       <ArticleJsonLd
         title={article.title}
         description={article.excerpt}
@@ -79,7 +79,7 @@ export default async function ArticlePage({ params }: Params) {
         {article.last_reviewed_at ? ` · Last reviewed ${formatDate(article.last_reviewed_at)}` : ""}
         {article.reviewer_name ? ` · Reviewed by ${article.reviewer_name}` : ""}
       </p>
-      <h1 className="mt-3 font-serif text-5xl text-navy">{article.title}</h1>
+      <h1 className="mt-3 text-5xl text-navy">{article.title}</h1>
       <p className="mt-4 text-lg text-muted">{article.excerpt}</p>
       <div className="mt-10 whitespace-pre-wrap leading-relaxed text-charcoal">{article.body}</div>
       <p className="mt-8 text-sm text-muted">
@@ -96,7 +96,7 @@ export default async function ArticlePage({ params }: Params) {
             <Button href="/services" variant="outline">
               View services
             </Button>
-            <Button href="/contact">Book a consultation</Button>
+            <Button href="/book">Book a consultation</Button>
           </div>
         </CardBody>
       </Card>

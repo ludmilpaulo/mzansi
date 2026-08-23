@@ -60,7 +60,7 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
                   href={link.href}
                   className={cn(
                     "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition",
-                    active ? "bg-navy text-white shadow-sm" : "text-charcoal hover:bg-surface",
+                    active ? "bg-brand text-white shadow-sm" : "text-charcoal hover:bg-soft",
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -84,7 +84,7 @@ export function PortalShell({ children }: { children: React.ReactNode }) {
                   href={link.href}
                   className={cn(
                     "shrink-0 rounded-full px-3.5 py-1.5 text-xs font-medium",
-                    active ? "bg-navy text-white" : "bg-white text-charcoal shadow-sm",
+                    active ? "bg-brand text-white" : "bg-white text-charcoal shadow-sm",
                   )}
                 >
                   {link.label}

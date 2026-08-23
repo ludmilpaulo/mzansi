@@ -14,11 +14,13 @@ export type HomeStackParamList = {
   Notifications: undefined;
   BookConsultation: undefined;
   ApplicationDetail: { id: number };
+  ApplicationTracking: { id: number };
 };
 
 export type ApplicationsStackParamList = {
   ApplicationsList: undefined;
   ApplicationDetail: { id: number };
+  ApplicationTracking: { id: number };
   NewApplication: undefined;
 };
 

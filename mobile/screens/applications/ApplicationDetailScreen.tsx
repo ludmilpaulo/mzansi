@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 
+import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
@@ -13,9 +14,10 @@ import { getErrorMessage } from "../../utils/errors";
 
 interface ApplicationDetailScreenProps {
   route: { params: { id: number } };
+  navigation: { navigate: (name: "ApplicationTracking", params: { id: number }) => void };
 }
 
-export function ApplicationDetailScreen({ route }: ApplicationDetailScreenProps) {
+export function ApplicationDetailScreen({ route, navigation }: ApplicationDetailScreenProps) {
   const query = useGetApplicationQuery(route.params.id);
   const application = query.data;
 
@@ -33,6 +35,11 @@ export function ApplicationDetailScreen({ route }: ApplicationDetailScreenProps)
             <Text style={styles.kicker}>Next action</Text>
             <Text style={styles.next}>{application.next_action || "No client action recorded right now."}</Text>
             <ProgressBar value={application.progress} label="Progress" />
+            <Text style={styles.meta}>Mzansi status: {application.status.label}</Text>
+            <Text style={styles.meta}>
+              VFS status: {application.external_tracking?.status_label || "Not linked yet"}
+            </Text>
+            <Button title="Track application" variant="secondary" onPress={() => navigation.navigate("ApplicationTracking", { id: application.id })} />
           </Card>
           <Text style={styles.section}>Timeline</Text>
           {application.timeline.length === 0 ? <Text style={styles.meta}>No visible timeline events yet.</Text> : null}

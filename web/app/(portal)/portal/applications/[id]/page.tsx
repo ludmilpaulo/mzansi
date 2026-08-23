@@ -36,13 +36,29 @@ export default function PortalApplicationDetailPage() {
           <h1 className="font-serif text-4xl text-navy">{item.service.name}</h1>
           <p className="mt-2 text-sm text-muted">Opened {formatDate(item.created_at)}</p>
         </div>
-        <Badge tone={item.status.client_action_required ? "warning" : "info"}>{item.status.label}</Badge>
+        <div className="flex flex-wrap gap-2">
+          <Badge tone={item.status.client_action_required ? "warning" : "info"}>{item.status.label}</Badge>
+          {item.external_tracking?.status_label ? <Badge tone="brand">{item.external_tracking.status_label}</Badge> : null}
+        </div>
       </div>
       <Card>
         <CardBody className="space-y-3">
           <p className="text-sm font-medium text-navy">What you need to do next</p>
           <p className="text-sm text-charcoal">{item.next_action || "Nothing is waiting on you right now."}</p>
           <ProgressBar value={item.progress} />
+          <div className="grid gap-3 pt-2 md:grid-cols-2">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">Mzansi case status</p>
+              <p className="mt-1 text-sm text-navy">{item.status.label}</p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">VFS / DHA status</p>
+              <p className="mt-1 text-sm text-navy">{item.external_tracking?.status_label || "Not linked yet"}</p>
+            </div>
+          </div>
+          <Button href={`/portal/applications/${item.id}/tracking`} variant="outline" size="sm">
+            View full tracking
+          </Button>
         </CardBody>
       </Card>
       <div className="grid gap-6 lg:grid-cols-2">

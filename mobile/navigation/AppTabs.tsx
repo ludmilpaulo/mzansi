@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ApplicationDetailScreen } from "../screens/applications/ApplicationDetailScreen";
 import { ApplicationsScreen } from "../screens/applications/ApplicationsScreen";
 import { NewApplicationScreen } from "../screens/applications/NewApplicationScreen";
+import { TrackingScreen } from "../screens/applications/TrackingScreen";
 import { BookConsultationScreen } from "../screens/consultations/BookConsultationScreen";
 import { DocumentsScreen } from "../screens/documents/DocumentsScreen";
 import { HomeScreen } from "../screens/home/HomeScreen";
@@ -46,6 +47,7 @@ function HomeStackNavigator() {
       <HomeStack.Screen name="Notifications" component={NotificationsScreen} options={{ title: "Notifications" }} />
       <HomeStack.Screen name="BookConsultation" component={BookConsultationScreen} options={{ title: "Book consultation" }} />
       <HomeStack.Screen name="ApplicationDetail" component={ApplicationDetailScreen} options={{ title: "Application" }} />
+      <HomeStack.Screen name="ApplicationTracking" component={TrackingScreen} options={{ title: "Track application" }} />
     </HomeStack.Navigator>
   );
 }
@@ -55,6 +57,7 @@ function ApplicationsStackNavigator() {
     <ApplicationsStack.Navigator screenOptions={stackOptions}>
       <ApplicationsStack.Screen name="ApplicationsList" component={ApplicationsScreen} options={{ title: "Applications" }} />
       <ApplicationsStack.Screen name="ApplicationDetail" component={ApplicationDetailScreen} options={{ title: "Application" }} />
+      <ApplicationsStack.Screen name="ApplicationTracking" component={TrackingScreen} options={{ title: "Track application" }} />
       <ApplicationsStack.Screen name="NewApplication" component={NewApplicationScreen} options={{ title: "New application" }} />
     </ApplicationsStack.Navigator>
   );

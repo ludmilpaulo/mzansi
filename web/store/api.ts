@@ -13,6 +13,7 @@ import type {
   ApplicationQuery,
   ApplicationStatus,
   ApplicationTransitionRequest,
+  ActivateAccountRequest,
   Appointment,
   AppointmentCreateRequest,
   AppointmentSlot,
@@ -25,6 +26,7 @@ import type {
   CmsPage,
   ConsultationType,
   Conversation,
+  CurrentTermsDocument,
   DashboardStats,
   DetailResponse,
   DocumentQuery,
@@ -36,7 +38,10 @@ import type {
   ExternalTrackingAdminRow,
   FAQ,
   HomeContent,
+  PublicBookRequest,
+  PublicBookResponse,
   PublicSeoIndex,
+  PublicSlotsResponse,
   SeoLandingDetail,
   SeoLandingList,
   Inquiry,
@@ -65,6 +70,7 @@ import type {
   ApplicationTrackingHistoryItem,
   ManualTrackingUpdate,
   SiteSetting,
+  SlotHoldResponse,
   StaffClient,
   StaffUser,
   Testimonial,
@@ -129,8 +135,15 @@ export const api = createApi({
       query: (slug) => `/content/pages/${slug}`,
       providesTags: ["Content"],
     }),
-    getFaqs: builder.query<FAQ[], void>({
-      query: () => "/content/faqs",
+    getFaqs: builder.query<FAQ[], { search?: string; category?: string; page_size?: number } | void>({
+      query: (args) => ({
+        url: "/content/faqs",
+        params: {
+          search: args?.search || undefined,
+          category: args?.category || undefined,
+          page_size: args?.page_size ?? 100,
+        },
+      }),
       transformResponse: (response: unknown) => asList<FAQ>(response),
       providesTags: ["Content"],
     }),
@@ -298,6 +311,46 @@ export const api = createApi({
       { consultant_id: number; date: string; consultation_type_id?: number }
     >({
       query: (params) => ({ url: "/appointments/slots", params }),
+      transformResponse: (response: unknown) => {
+        if (typeof response === "object" && response !== null && "slots" in response) {
+          const nested = response as PublicSlotsResponse;
+          return nested.slots;
+        }
+        return asList<AppointmentSlot>(response);
+      },
+    }),
+    getPublicConsultationTypes: builder.query<ConsultationType[], void>({
+      query: () => "/public/consultation-types",
+      transformResponse: (response: unknown) => asList<ConsultationType>(response),
+    }),
+    getPublicConsultants: builder.query<PublicConsultant[], void>({
+      query: () => "/public/consultants",
+      transformResponse: (response: unknown) => asList<PublicConsultant>(response),
+    }),
+    getPublicSlots: builder.query<
+      PublicSlotsResponse,
+      { consultant_id: number; date: string; consultation_type_id?: number; hold_id?: string }
+    >({
+      query: (params) => ({ url: "/public/consultations/slots", params }),
+    }),
+    holdPublicSlot: builder.mutation<
+      SlotHoldResponse,
+      { consultation_type_id: number; consultant_id: number; starts_at: string }
+    >({
+      query: (body) => ({ url: "/public/consultations/hold", method: "POST", body }),
+    }),
+    bookPublicConsultation: builder.mutation<PublicBookResponse, PublicBookRequest>({
+      query: (body) => ({ url: "/public/consultations/book", method: "POST", body }),
+      invalidatesTags: ["Appointment"],
+    }),
+    getCurrentTerms: builder.query<CurrentTermsDocument, void>({
+      query: () => "/public/legal/terms/current",
+    }),
+    activateAccount: builder.mutation<DetailResponse, ActivateAccountRequest>({
+      query: (body) => ({ url: "/auth/activate", method: "POST", body }),
+    }),
+    resendActivation: builder.mutation<DetailResponse, { email: string }>({
+      query: (body) => ({ url: "/auth/activate/resend", method: "POST", body }),
     }),
     getConversations: builder.query<Paginated<Conversation>, void>({
       query: () => "/conversations",
@@ -413,6 +466,14 @@ export const {
   useUpdateServiceMutation,
   useGetConsultationTypesQuery,
   useGetConsultantsQuery,
+  useGetPublicConsultationTypesQuery,
+  useGetPublicConsultantsQuery,
+  useGetPublicSlotsQuery,
+  useHoldPublicSlotMutation,
+  useBookPublicConsultationMutation,
+  useGetCurrentTermsQuery,
+  useActivateAccountMutation,
+  useResendActivationMutation,
   useGetDashboardQuery,
   useGetApplicationsQuery,
   useGetApplicationQuery,

@@ -40,7 +40,7 @@ class SiteSettingViewSet(PublicOrAdminMixin, viewsets.ModelViewSet):
             {
                 "settings": settings_map,
                 "services": ServiceListSerializer(Service.objects.filter(is_active=True)[:8], many=True).data,
-                "faqs": FAQSerializer(FAQ.objects.filter(is_active=True)[:8], many=True).data,
+                "faqs": FAQSerializer(FAQ.objects.filter(is_active=True)[:12], many=True).data,
                 "testimonials": TestimonialSerializer(Testimonial.objects.filter(is_active=True, is_featured=True)[:6], many=True).data,
                 "featured_articles": ArticleListSerializer(
                     Article.objects.filter(is_published=True, is_featured=True)[:3], many=True
@@ -82,9 +82,10 @@ class PageViewSet(PublicOrAdminMixin, viewsets.ModelViewSet):
 
 
 class FAQViewSet(PublicOrAdminMixin, viewsets.ModelViewSet):
-    queryset = FAQ.objects.all()
+    queryset = FAQ.objects.select_related("related_service")
     serializer_class = FAQSerializer
-    filterset_fields = ("category", "is_active")
+    filterset_fields = ("category", "is_active", "related_service")
+    search_fields = ("question", "answer", "category")
 
     def get_queryset(self):
         qs = super().get_queryset()

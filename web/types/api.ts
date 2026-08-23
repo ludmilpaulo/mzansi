@@ -8,6 +8,7 @@ export interface ApiErrorBody {
   code: string;
   detail: string;
   fields?: FieldErrors;
+  alternatives?: AppointmentSlot[];
 }
 
 export interface ApiSuccess<T> {
@@ -563,10 +564,11 @@ export interface ConsultationType {
   sort_order: number;
 }
 
-export type AppointmentStatus = "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED" | "RESCHEDULED";
+export type AppointmentStatus = "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED" | "RESCHEDULED" | "NO_SHOW";
 
 export interface Appointment {
   id: number;
+  reference_number?: string;
   client: number;
   client_name: string;
   consultant_name: string;
@@ -574,12 +576,91 @@ export interface Appointment {
   application: number | null;
   starts_at: string;
   ends_at: string;
+  timezone_name?: string;
   status: AppointmentStatus;
   meeting_link: string;
   client_notes: string;
   staff_notes?: string;
   cancelled_reason: string;
+  calendar_token?: string;
   created_at: string;
+}
+
+export interface AppointmentSlot {
+  starts_at: string;
+  ends_at: string;
+  timezone?: string;
+  label_sast?: string;
+}
+
+export interface PublicSlotsResponse {
+  timezone: string;
+  slots: AppointmentSlot[];
+}
+
+export interface SlotHoldResponse {
+  hold_id: string;
+  starts_at: string;
+  expires_at: string;
+  expires_in_seconds: number;
+}
+
+export interface PublicBookRequest {
+  consultation_type_id: number;
+  consultant_id: number;
+  starts_at: string;
+  hold_id?: string | null;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  nationality: string;
+  current_country: string;
+  matter_summary: string;
+  preferred_language?: string;
+  additional_message?: string;
+  timezone_name?: string;
+  terms_version: string;
+  accept_terms: boolean;
+}
+
+export interface PublicBookResponse {
+  appointment: {
+    id: number;
+    reference_number: string;
+    status: AppointmentStatus;
+    starts_at: string;
+    ends_at: string;
+    timezone_name: string;
+    consultation_type: string;
+    duration_minutes: number;
+    consultant_name: string;
+    calendar_token: string;
+  };
+  client: {
+    email: string;
+    first_name: string;
+    last_name: string;
+  };
+  account_created: boolean;
+  activation_required: boolean;
+  activation_expires_at: string | null;
+  message: string;
+}
+
+export interface CurrentTermsDocument {
+  version: string;
+  title: string;
+  effective_date: string | null;
+  summary: string;
+  body: string;
+}
+
+export interface ActivateAccountRequest {
+  email: string;
+  token: string;
+  password: string;
+  password_confirm: string;
 }
 
 export interface AppointmentCreateRequest {
@@ -587,11 +668,6 @@ export interface AppointmentCreateRequest {
   consultant_id: number;
   starts_at: string;
   client_notes?: string;
-}
-
-export interface AppointmentSlot {
-  starts_at: string;
-  ends_at: string;
 }
 
 export interface PublicConsultant {
@@ -742,8 +818,13 @@ export interface FAQ {
   question: string;
   answer: string;
   category: string;
+  related_service?: number | null;
+  related_service_slug?: string | null;
   sort_order: number;
   is_active: boolean;
+  last_reviewed_at?: string | null;
+  next_review_at?: string | null;
+  reviewed_by?: string;
 }
 
 export interface Testimonial {

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Instrument_Serif, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import type { ReactNode } from "react";
 
 import { StoreProvider } from "@/store/store-provider";
@@ -8,10 +8,9 @@ import { generatePageMetadata } from "@/lib/seo";
 
 import "./globals.css";
 
-const instrument = Instrument_Serif({
+const inter = Inter({
   subsets: ["latin"],
-  weight: "400",
-  variable: "--font-instrument",
+  variable: "--font-inter",
   display: "swap",
 });
 
@@ -33,7 +32,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${instrument.variable} ${jakarta.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} ${jakarta.variable}`} suppressHydrationWarning>
       <body className="min-h-screen font-sans antialiased" suppressHydrationWarning>
         <StoreProvider>{children}</StoreProvider>
       </body>

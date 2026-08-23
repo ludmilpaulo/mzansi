@@ -1,5 +1,5 @@
-import { Spinner } from "@/components/ui/Spinner";
+import { PageSkeleton } from "@/components/public/PageSkeleton";
 
 export default function PublicLoading() {
-  return <Spinner className="min-h-[50vh]" label="Loading page" />;
+  return <PageSkeleton />;
 }

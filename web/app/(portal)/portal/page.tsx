@@ -52,7 +52,12 @@ export default function PortalHomePage() {
                   {active.reference} · {active.service.name}
                 </p>
               </div>
-              <Badge tone={active.status.client_action_required ? "warning" : "info"}>{active.status.label}</Badge>
+              <div className="flex flex-wrap gap-2">
+                <Badge tone={active.status.client_action_required ? "warning" : "info"}>{active.status.label}</Badge>
+                {active.external_tracking?.status_label ? (
+                  <Badge tone="brand">{active.external_tracking.status_label}</Badge>
+                ) : null}
+              </div>
             </div>
             <div>
               <div className="mb-2 flex justify-between text-xs text-muted">
@@ -61,8 +66,24 @@ export default function PortalHomePage() {
               </div>
               <ProgressBar value={active.progress} />
             </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">Mzansi case status</p>
+                <p className="mt-1 text-sm font-medium text-navy">{active.status.label}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">External VFS status</p>
+                <p className="mt-1 text-sm font-medium text-navy">{active.external_tracking?.status_label || "Not linked yet"}</p>
+                {active.external_tracking?.checked_at ? (
+                  <p className="mt-1 text-xs text-muted">Last checked {new Date(active.external_tracking.checked_at).toLocaleString()}</p>
+                ) : null}
+              </div>
+            </div>
             <div className="flex flex-wrap gap-3">
               <Button href={`/portal/applications/${active.id}`}>Open application</Button>
+              <Button href={`/portal/applications/${active.id}/tracking`} variant="secondary">
+                View full tracking
+              </Button>
               {active.document_counts.pending > 0 ? (
                 <Button href="/portal/documents" variant="outline">
                   <FileText className="h-4 w-4" />

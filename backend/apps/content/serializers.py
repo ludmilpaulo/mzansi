@@ -40,9 +40,23 @@ class PageSerializer(serializers.ModelSerializer):
 
 
 class FAQSerializer(serializers.ModelSerializer):
+    related_service_slug = serializers.CharField(source="related_service.slug", read_only=True, allow_null=True)
+
     class Meta:
         model = FAQ
-        fields = ("id", "question", "answer", "category", "sort_order", "is_active")
+        fields = (
+            "id",
+            "question",
+            "answer",
+            "category",
+            "related_service",
+            "related_service_slug",
+            "sort_order",
+            "is_active",
+            "last_reviewed_at",
+            "next_review_at",
+            "reviewed_by",
+        )
 
 
 class TestimonialSerializer(serializers.ModelSerializer):
