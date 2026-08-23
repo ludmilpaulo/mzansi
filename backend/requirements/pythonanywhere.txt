@@ -1,0 +1,3 @@
+-r base.txt
+# PythonAnywhere beginner hosting uses SQLite and their WSGI server.
+# Keep this file aligned with base.txt so production matches local installs.

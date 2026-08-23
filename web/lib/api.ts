@@ -8,12 +8,29 @@ import type {
   Paginated,
 } from "@/types/api";
 
+const LOCAL_API_BASE_URL = "http://127.0.0.1:8000/api/v1";
+const PRODUCTION_API_BASE_URL = "https://kudya.pythonanywhere.com/api/v1";
+
 export function getApiBaseUrl(): string {
-  return (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000/api/v1").replace(/\/$/, "");
+  const configured = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").trim().replace(/\/$/, "");
+  if (configured && /^https?:\/\//i.test(configured)) {
+    return configured;
+  }
+  if (process.env.NODE_ENV === "production") {
+    return PRODUCTION_API_BASE_URL;
+  }
+  return LOCAL_API_BASE_URL;
 }
 
 export function getSiteUrl(): string {
-  return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://127.0.0.1:3000").replace(/\/$/, "");
+  const configured = (process.env.NEXT_PUBLIC_SITE_URL ?? "").trim().replace(/\/$/, "");
+  if (configured && /^https?:\/\//i.test(configured)) {
+    return configured;
+  }
+  if (process.env.NODE_ENV === "production") {
+    return "https://mzansi-pi.vercel.app";
+  }
+  return "http://127.0.0.1:3000";
 }
 
 function isRecord(value: unknown): value is { [key: string]: unknown } {

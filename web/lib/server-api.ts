@@ -1,7 +1,8 @@
 import { getApiBaseUrl, readApiError, unwrapEnvelope } from "@/lib/api";
 
 export async function serverGet<T>(path: string): Promise<T> {
-  const response = await fetch(`${getApiBaseUrl()}${path}`, { cache: "no-store" });
+  const url = new URL(path.replace(/^\//, ""), `${getApiBaseUrl()}/`).toString();
+  const response = await fetch(url, { cache: "no-store" });
   let json: unknown = null;
   try {
     json = await response.json();
